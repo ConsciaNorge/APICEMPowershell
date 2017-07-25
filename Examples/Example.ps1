@@ -45,3 +45,5 @@ $networkDeviceManagementInfo = Get-APICEMNetworkDeviceManagementInfo @apicEMSess
 $networkDevicelocation = Get-APICEMNetworkDeviceLocation @apicEMSession -DeviceId $networkDevices.id
 
 $networkDevice = Get-APICEMNetworkDevice @apicEMSession -SerialNumber $networkDevices.serialNumber
+
+$result = Remove-APICEMServiceTicket @apicEMSession
