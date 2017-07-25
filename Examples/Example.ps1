@@ -48,4 +48,12 @@ $networkDevice = Get-APICEMNetworkDevice @apicEMSession -SerialNumber $networkDe
 
 $plugAndPlayDevices = Get-APICEMNetworkPlugAndPlayDevices @apicEMSession
 
+$deviceHistory = Get-APICEMNetworkPlugAndPlayDeviceHistory @apicEMSession -SerialNumber $plugAndPlayDevices[0].serialNumber
+
+$plugAndPlayDevice = Get-APICEMNetworkPlugAndPlayDevice @apicEMSession -DeviceID $plugAndPlayDevices[0].id
+
+$templates = Get-APICEMNetworkPlugAndPlayTemplates @apicEMSession 
+
+$templateFile = Get-APICEMFile @apicEMSession -FileID $templates[0].fileId
+
 $result = Remove-APICEMServiceTicket @apicEMSession

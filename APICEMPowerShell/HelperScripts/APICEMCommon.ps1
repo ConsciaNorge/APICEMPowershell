@@ -17,7 +17,10 @@ Function Internal-APICEMGetRequest {
         [string]$Uri,
 
         [Parameter(Mandatory)]
-        [string]$ServiceTicket
+        [string]$ServiceTicket,
+
+        [Parameter()]
+        [switch]$Raw
     )
 
     # Create the headers to pass as part of the HTTP request
@@ -50,6 +53,11 @@ Function Internal-APICEMGetRequest {
                 $_.Exception
             )
         }
+    }
+
+    # Return the raw result if JSON is not prefered
+    if ($Raw) {
+        return $result
     }
 
     # Return what came back from the APIC-EM server
