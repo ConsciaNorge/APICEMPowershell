@@ -1,0 +1,2 @@
+# APIC-EM For PowerShell
+The code in this module is intended for a project I'm working on for automating APIC-EM from within Powershell for a large scale network deployment. For the moment, it contains the functions and documentation I need and nothing more. I am willing to expand it upon request and to accept pull requests.
