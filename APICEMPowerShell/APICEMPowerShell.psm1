@@ -12,3 +12,6 @@ Export-ModuleMember -Function Get-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Get-APICEMNetworkDeviceModules
 Export-ModuleMember -Function Get-APICEMNetworkDeviceManagementInfo
 
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkPlugAndPlay/APICEMNetworkPlugAndPlay.ps1')
+
+Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayDevices
