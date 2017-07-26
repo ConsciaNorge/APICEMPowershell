@@ -1,3 +1,22 @@
+$script:InternalAPICEMSession = $null
+
+<#
+    This code is a Powershell workaround to allow self-signed certificates to be used without installing it as a trust 
+#>
+add-type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+
+        public class IDontCarePolicy : ICertificatePolicy {
+        public IDontCarePolicy() {}
+        public bool CheckValidationResult(
+            ServicePoint sPoint, X509Certificate cert,
+            WebRequest wRequest, int certProb) {
+            return true;
+        }
+    }
+"@
+
 <#
     .SYNOPSIS
         Internal function to simplify preparing headers and making GET requests to an APIC-EM server
@@ -16,12 +35,29 @@ Function Internal-APICEMGetRequest {
         [Parameter(Mandatory)]
         [string]$Uri,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket,
 
         [Parameter()]
         [switch]$Raw
     )
+
+    if ([string]::IsNullOrEmpty($ServiceTicket)) {
+        if($null -eq $script:InternalAPICEMSession) {
+            throw [System.Security.SecurityException]::new(
+                'No service ticket available for making requests against APIC-EM'
+            )
+        }
+
+        $uriInfo = [System.Uri]::new($uri)
+        if($uriInfo.Host -ne $script:InternalAPICEMSession.Host) {
+            throw [System.Security.SecurityException]::new(
+                'Stored APIC-EM service ticket is for ' + $script:InternalAPICEMSession.Host + ' not for ' + $uriInfo.Host
+            )
+        }
+
+        $ServiceTicket = $script:InternalAPICEMSession.ServiceTicket
+    }
 
     # Create the headers to pass as part of the HTTP request
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -49,7 +85,103 @@ Function Internal-APICEMGetRequest {
 
         } else {
             throw [System.Exception]::new(
-                'Failed to get a list of network devices from APIC-EM',
+                'Failed to perform get against APIC-EM',
+                $_.Exception
+            )
+        }
+    }
+
+    # Return the raw result if JSON is not prefered
+    if ($Raw) {
+        return $result
+    }
+
+    # Return what came back from the APIC-EM server
+    return $result.response
+}
+
+<#
+    .SYNOPSIS
+        Internal function to simplify preparing headers and making GET requests to an APIC-EM server
+
+    .PARAMETER Uri
+        The full APIC-EM URI to make the request against
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by Get-APICEMServiceTicket after authentication
+
+    .PARAMETER Raw
+        When this switch is set, then the raw content of the response is returned instead of the value of the JSON object response
+
+    .PARAMETER BodyValue
+        An object to convert to JSON to transfer as the body of the request
+
+    .RETURNVALUE
+        The return value from the REST call if it completed successfully.
+#>
+Function Internal-APICEMPostRequest {
+    Param (
+        [Parameter(Mandatory)]
+        [string]$Uri,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter()]
+        [switch]$Raw,
+
+        [Parameter()]
+        [Object]$BodyValue
+    )
+
+    if ([string]::IsNullOrEmpty($ServiceTicket)) {
+        if($null -eq $script:InternalAPICEMSession) {
+            throw [System.Security.SecurityException]::new(
+                'No service ticket available for making requests against APIC-EM'
+            )
+        }
+
+        $uriInfo = [System.Uri]::new($uri)
+        if($uriInfo.Host -ne $script:InternalAPICEMSession.Host) {
+            throw [System.Security.SecurityException]::new(
+                'Stored APIC-EM service ticket is for ' + $script:InternalAPICEMSession.Host + ' not for ' + $uriInfo.Host
+            )
+        }
+
+        $ServiceTicket = $script:InternalAPICEMSession.ServiceTicket
+    }
+
+    # Create the headers to pass as part of the HTTP request
+    $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    $headers.Add("content-type", 'application/json')
+    $headers.Add("X-Auth-Token", $ServiceTicket)
+
+    # Convert the BodyValue parameter to JSON
+    $bodyText = ConvertTo-Json -InputObject $BodyValue 
+
+    # Setup the parameters to pass to Invoke-RESTMethod (splatting)
+    $parameters = @{
+        Method = 'Post'
+        Uri = $Uri
+        Headers = $headers
+        Body = $bodyText
+    }
+
+    $result = $null
+    try {
+        # Make the REST API call
+        $result = Invoke-RestMethod @parameters
+    } catch {
+        # Upon error, attempt to classify it and throw an exception
+        if ($_.Exception -is [System.Net.WebException]) {
+            throw [System.Exception]::new(
+                'Http exception',
+                $_.Exception
+            )
+
+        } else {
+            throw [System.Exception]::new(
+                'Failed to perform get against APIC-EM',
                 $_.Exception
             )
         }
@@ -82,9 +214,26 @@ Function Internal-APICEMDeleteRequest {
         [Parameter(Mandatory)]
         [string]$Uri,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket
     )
+
+    if ([string]::IsNullOrEmpty($ServiceTicket)) {
+        if($null -eq $script:InternalAPICEMSession) {
+            throw [System.Security.SecurityException]::new(
+                'No service ticket available for making requests against APIC-EM'
+            )
+        }
+
+        $uriInfo = [System.Uri]::new($uri)
+        if($uriInfo.Host -ne $script:InternalAPICEMSession.Host) {
+            throw [System.Security.SecurityException]::new(
+                'Stored APIC-EM service ticket is for ' + $script:InternalAPICEMSession.Host + ' not for ' + $uriInfo.Host
+            )
+        }
+
+        $ServiceTicket = $script:InternalAPICEMSession.ServiceTicket
+    }
 
     # Create the headers to pass as part of the HTTP request
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -140,11 +289,15 @@ Function Internal-APICEMDeleteRequest {
     .PARAMETER Password
         The password to use in order to authenticate against the server.
 
+    .PARAMETER Passthru
+        Returns the service ticket when this is true, otherwise, it sets a global session variable
+
     .RETURNVALUE
-        A string containing the service ticket required by all follow up calls
+        A string containing the service ticket required by all follow up calls when -Passthru is set. Otherwise, there is
+        no return value
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345' -Passthru
 
     .NOTES
         This function doesn't follow Powershell 'best practices for security and should use a PSCredentials structure instead,
@@ -159,8 +312,24 @@ Function Get-APICEMServiceTicket {
         [string]$Username,
 
         [Parameter(Mandatory)]
-        [string]$Password
+        [string]$Password,
+
+        [Parameter()]
+        [switch]$Passthru,
+
+        [Parameter()]
+        [switch]$IgnoreBadCerts
     )
+
+    if($IgnoreBadCerts) {
+        [System.Net.ServicePointManager]::CertificatePolicy = [IDontCarePolicy]::new() 
+    }
+
+    if ((-not $PassThru) -and ($null -ne $script:InternalAPICEMSession)) {
+        throw [System.ArgumentException]::new(
+            'When initiating a second instance of APIC-EM, it is necessary to use -Passthru and to manually maintain reference to the service ticket'
+        )
+    }
 
     # Add the content-type of 'application/json' to the header
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -192,8 +361,54 @@ Function Get-APICEMServiceTicket {
         )
     }
 
-    # Return the service ticket
-    return $result.response.serviceTicket
+    if($Passthru) {
+        # Return the service ticket
+        return $result.response.serviceTicket
+    }
+
+$script:InternalAPICEMSession = @{
+        Host = $HostIP
+        ServiceTicket = $result.response.serviceTicket
+    }
+}
+
+Function Internal-APICEMHostIPAndServiceTicket {
+    Param(
+        [Parameter()]
+        [string]$HostIP,
+
+        [Parameter()]
+        [string]$ServiceTicket
+    )
+
+    # If the HostIP and ServiceTicket are provided 
+    if((-not [string]::IsNullOrEmpty($HostIP)) -and (-not [string]::IsNullOrEmpty($ServiceTicket))) {
+        # Return the provided HostIP and ServiceTicket
+        return @{
+            Host = $HostIP
+            ServiceTicket = $ServiceTicket
+        }
+    } 
+    
+    # If either the HostIP or the ServiceTicket are provided
+    if((-not [string]::IsNullOrEmpty($HostIP)) -or (-not [string]::IsNullOrEmpty($ServiceTicket))) {
+        throw [System.ArgumentException]::new(
+            'When using argument HostIP or ServiceTicket it is necessary to use both'
+        )
+    }
+
+    # If there are no APIC-EM session credentials stored
+    if($null -eq $script:InternalAPICEMSession) {
+        throw [System.Security.SecurityException]::new(
+            'A service ticket has not been obtained from APIC-EM or provided as arguments'
+        )
+    }
+
+    # Return the stored Host and ServiceTicket
+    return @{
+        Host = $script:InternalAPICEMSession.Host
+        ServiceTicket = $script:InternalAPICEMSession.ServiceTicket
+    }
 }
 
 <#
@@ -207,19 +422,23 @@ Function Get-APICEMServiceTicket {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Remove-APICEMServiceTicket -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket 
+        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Remove-APICEMServiceTicket  
 #>
 Function Remove-APICEMServiceTicket {
     Param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$HostIP,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket
     )
 
-    $response = Internal-APICEMDeleteRequest -ServiceTicket $ServiceTicket -Uri ('https://' + $HostIP + '/api/v1/ticket/' + $ServiceTicket)
+    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket
+
+    $response = Internal-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/ticket/' + $session.ServiceTicket)
+
+    $script:InternalAPICEMSession = $null
 
     return $response
 }

@@ -15,14 +15,16 @@
 #>
 Function Get-APICEMNetworkDevices {
     Param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$HostIP,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket
     )
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $ServiceTicket -Uri ('https://' + $HostIP + '/api/v1/network-device')
+    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device')
 
     return $response
 }
@@ -46,17 +48,19 @@ Function Get-APICEMNetworkDevices {
 #>
 Function Get-APICEMNetworkDevice {
     Param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$HostIP,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket,
 
         [Parameter(Mandatory)]
         [string]$SerialNumber
     )
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $ServiceTicket -Uri ('https://' + $HostIP + '/api/v1/network-device/serial-number/' + $SerialNumber)
+    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/serial-number/' + $SerialNumber)
 
     return $response
 }
@@ -80,17 +84,19 @@ Function Get-APICEMNetworkDevice {
 #>
 Function Get-APICEMNetworkDeviceConfig {
     Param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$HostIP,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket,
 
         [Parameter(Mandatory)]
         [string]$DeviceId
     )
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $ServiceTicket -Uri ('https://' + $HostIP + '/api/v1/network-device/config?id=' + $DeviceID)
+    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/config?id=' + $DeviceID)
 
     return $response.RunningConfig
 }
@@ -114,17 +120,19 @@ Function Get-APICEMNetworkDeviceConfig {
 #>
 Function Get-APICEMNetworkDeviceModules {
     Param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$HostIP,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket,
 
         [Parameter(Mandatory)]
         [string]$DeviceId
     )
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $ServiceTicket -Uri ('https://' + $HostIP + '/api/v1/network-device/module?deviceId=' + $DeviceID)
+    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/module?deviceId=' + $DeviceID)
 
     return $response
 }
@@ -152,17 +160,19 @@ Function Get-APICEMNetworkDeviceModules {
 #>
 Function Get-APICEMNetworkDeviceManagementInfo {
     Param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$HostIP,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket,
 
         [Parameter(Mandatory)]
         [string]$DeviceId
     )
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $ServiceTicket -Uri ('https://' + $HostIP + '/api/v1/network-device/management-info?id=' + $DeviceID)
+    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/management-info?id=' + $DeviceID)
 
     return $response
 }
@@ -186,17 +196,19 @@ Function Get-APICEMNetworkDeviceManagementInfo {
 #>
 Function Get-APICEMNetworkDeviceLocation {
     Param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$HostIP,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$ServiceTicket,
 
         [Parameter(Mandatory)]
         [string]$DeviceId
     )
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $ServiceTicket -Uri ('https://' + $HostIP + '/api/v1/network-device/location?id=' + $DeviceID)
+    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/location?id=' + $DeviceID)
 
     return $response
 }
