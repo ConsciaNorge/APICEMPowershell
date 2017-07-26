@@ -1,4 +1,4 @@
-Clear-Host
+Clear-ApicHost
 
 $null = Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\APICEMPowerShell\APICEMPowerShell.psd1') -Force
 
@@ -23,13 +23,13 @@ Describe -Name 'APICEMPowershell Module Load' -Tag $Global -Fixture {
 Describe -Name 'Get-APICEMServiceTicket' -Tags $Utility -Fixture {
   Context -Name 'Input' -Fixture {
     It -name 'Should not throw' -test {
-      { Get-APICEMServiceTicket -HostIP $APICEMHost -Username $APICEMUsername -Password $APICEMPassword } | Should Not Throw
+      { Get-APICEMServiceTicket -ApicHost $APICEMHost -Username $APICEMUsername -Password $APICEMPassword } | Should Not Throw
     }
   }
   Context -Name 'Execution' -Fixture {}
   Context -Name 'Output' -Fixture {
 	  It -Name 'Should produce correct output' -test {
-		  $Command = @(Get-APICEMServiceTicket -HostIP $APICEMHost -Username $APICEMUsername -Password $APICEMPassword)
+		  $Command = @(Get-APICEMServiceTicket -ApicHost $APICEMHost -Username $APICEMUsername -Password $APICEMPassword)
       $Command | Should BeLike "ST-*"
 	  }
   }
