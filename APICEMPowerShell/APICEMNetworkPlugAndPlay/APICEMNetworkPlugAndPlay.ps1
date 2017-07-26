@@ -12,13 +12,13 @@
         The GUID which represents the device
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkPlugAndPlayDevice -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '5fb95f97-6558-4c1a-82ca-f732f05acab3'
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkPlugAndPlayDevice -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '5fb95f97-6558-4c1a-82ca-f732f05acab3'
 #>
 Function Get-APICEMNetworkPlugAndPlayDevice {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -30,10 +30,10 @@ Function Get-APICEMNetworkPlugAndPlayDevice {
         [string]$SerialNumber
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/pnp-device'
-    
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-device'
+
     if(-not [string]::IsNullOrEmpty($DeviceID)) {
         $uri += '/' + $DeviceID
     } elseif (-not [string]::IsNullOrEmpty($SerialNumber)) {
@@ -60,13 +60,13 @@ Function Get-APICEMNetworkPlugAndPlayDevice {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkPlugAndPlayDevices -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkPlugAndPlayDevices -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayDevices {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -75,9 +75,9 @@ Function Get-APICEMNetworkPlugAndPlayDevices {
         [switch]$Unclaimed
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/pnp-device'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-device'
 
     if($Unclaimed) {
         $uri += '?state=UNCLAIMED'
@@ -102,14 +102,14 @@ Function Get-APICEMNetworkPlugAndPlayDevices {
         The serial number of the device to query
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        $devices = Get-APICEMNetworkPlugAndPlayDevices -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket
-        Get-APICEMNetworkPlugAndPlayDeviceHistory -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket -SerialNumber $devices[0].SerialNumber
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        $devices = Get-APICEMNetworkPlugAndPlayDevices -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket
+        Get-APICEMNetworkPlugAndPlayDeviceHistory -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -SerialNumber $devices[0].SerialNumber
 #>
 Function Get-APICEMNetworkPlugAndPlayDeviceHistory {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -118,9 +118,9 @@ Function Get-APICEMNetworkPlugAndPlayDeviceHistory {
         [string]$SerialNumber
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/pnp-device-history?serialNumber=' + $SerialNumber)
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/pnp-device-history?serialNumber=' + $SerialNumber)
 
     return $response
 }
@@ -136,21 +136,21 @@ Function Get-APICEMNetworkPlugAndPlayDeviceHistory {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkPlugAndPlayTemplates -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkPlugAndPlayTemplates -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayTemplates {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/template')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/template')
 
     return $response
 }
@@ -169,14 +169,14 @@ Function Get-APICEMNetworkPlugAndPlayTemplates {
         The GUID of the template to retrieve
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayTemplate -TemplateID dc846aaa-0f26-4d08-bbe0-4ae032971b5a
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayTemplate {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -188,9 +188,9 @@ Function Get-APICEMNetworkPlugAndPlayTemplate {
         [string]$FileID
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/template'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/template'
     if(-not [string]::IsNullOrEmpty($TemplateID)) {
         $uri += '/' + $TemplateID
     } elseif (-not [string]::IsNullOrEmpty($FileID)) {
@@ -217,8 +217,8 @@ Function Get-APICEMNetworkPlugAndPlayTemplate {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkPlugAndPlayFileTemplates -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkPlugAndPlayFileTemplates -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket
 
     .NOTES
         This is the function which returns the raw template files, the Get-APICEMNetworkPlugAndPlayTemplates returns a list
@@ -227,15 +227,15 @@ Function Get-APICEMNetworkPlugAndPlayTemplate {
 Function Get-APICEMNetworkPlugAndPlayFileTemplates {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/pnp-file/template')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/pnp-file/template')
 
     return $response
 }
@@ -257,7 +257,7 @@ Function Get-APICEMNetworkPlugAndPlayFileTemplates {
         The name of the plug and play file object
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayFileTemplate -FileID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a'
         Remove-APICEMServiceTicket
 
@@ -268,7 +268,7 @@ Function Get-APICEMNetworkPlugAndPlayFileTemplates {
 Function Get-APICEMNetworkPlugAndPlayFileTemplate {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -280,9 +280,9 @@ Function Get-APICEMNetworkPlugAndPlayFileTemplate {
         [string]$Name
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/pnp-file/template'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-file/template'
     
     if(-not [string]::IsNullOrEmpty($FileID)) {
         $uri += '?fileId=' + $FileId
@@ -306,22 +306,22 @@ Function Get-APICEMNetworkPlugAndPlayFileTemplate {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayProjects
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayProjects {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/pnp-project')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/pnp-project')
 
     return $response
 }
@@ -343,14 +343,14 @@ Function Get-APICEMNetworkPlugAndPlayProjects {
         The name of the project
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayProject -Name 'minions'
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayProject {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -362,9 +362,9 @@ Function Get-APICEMNetworkPlugAndPlayProject {
         [string]$Name
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/pnp-project'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-project'
 
     if(-not [string]::IsNullOrEmpty($ProjectID)) {
         $uri += '/' + $ProjectID 
@@ -395,14 +395,14 @@ Function Get-APICEMNetworkPlugAndPlayProject {
         The GUID of the project
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayProjectDevices -ProjectID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a'
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayProjectDevices {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -411,9 +411,9 @@ Function Get-APICEMNetworkPlugAndPlayProjectDevices {
         [string]$ProjectID
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/pnp-project/' + $ProjectID + '/device'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-project/' + $ProjectID + '/device'
 
     $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
 
@@ -437,14 +437,14 @@ Function Get-APICEMNetworkPlugAndPlayProjectDevices {
         The GUID of the device
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayProjectDevice -ProjectID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a' -DeviceID '0ae8e543-ee35-4e15-a268-3121b144d542'
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayProjectDevice {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -456,9 +456,9 @@ Function Get-APICEMNetworkPlugAndPlayProjectDevice {
         [string]$DeviceID
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/pnp-project/' + $ProjectID + '/device/' + $DeviceID
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-project/' + $ProjectID + '/device/' + $DeviceID
 
     $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
 
@@ -476,22 +476,22 @@ Function Get-APICEMNetworkPlugAndPlayProjectDevice {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayPlatforms
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayPlatformFiles {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/pnp-file/platform')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/pnp-file/platform')
 
     return $response
 }
@@ -507,22 +507,22 @@ Function Get-APICEMNetworkPlugAndPlayPlatformFiles {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayTemplateRenderers
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayTemplateRenderers {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/template-renderer')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/template-renderer')
 
     return $response
 }
@@ -541,14 +541,14 @@ Function Get-APICEMNetworkPlugAndPlayTemplateRenderers {
         The template renderer ID representing the rendering job
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayTemplateRenderer -RendererID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a'
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayTemplateRenderer {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -557,9 +557,9 @@ Function Get-APICEMNetworkPlugAndPlayTemplateRenderer {
         [string]$RendererID
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/template-renderer/' + $RendererID
+    $uri = 'https://' + $session.ApicHost + '/api/v1/template-renderer/' + $RendererID
 
     $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
 
@@ -583,7 +583,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateRenderer {
         The properties to pass to the template for rendering
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         $configProperties = @{
             Parameter1 = 'Hello'
             Parameter2 = 'World'
@@ -594,7 +594,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateRenderer {
 Function Render-APICEMNetworkPlugAndPlayFileTemplate {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -606,9 +606,9 @@ Function Render-APICEMNetworkPlugAndPlayFileTemplate {
         $ConfigProperties
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/template-renderer'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/template-renderer'
 
     $requestObject = @(
         @{
@@ -633,22 +633,22 @@ Function Render-APICEMNetworkPlugAndPlayFileTemplate {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayTemplateConfigs
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayTemplateConfigs {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/template-config')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/template-config')
 
     return $response
 }
@@ -664,22 +664,22 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfigs {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayTemplateConfigs
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayTemplateConfigs {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/template-config')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/template-config')
 
     return $response
 }
@@ -701,14 +701,14 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfigs {
         The GUID of template which the config is associated
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMNetworkPlugAndPlayTemplateConfig -ConfigID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a'
         Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayTemplateConfig {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -720,9 +720,9 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfig {
         [string]$TemplateID
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/template-config'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/template-config'
 
     if(-not [string]::IsNullOrEmpty($ConfigID)) {
         $uri += '/' + $ConfigID
@@ -756,7 +756,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfig {
         The properties to pass to the template for rendering
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         $configProperties = @{
             Parameter1 = 'Hello'
             Parameter2 = 'World'
@@ -767,7 +767,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfig {
 Function Set-APICEMNetworkPlugAndPlayTemplateProperties {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -779,9 +779,9 @@ Function Set-APICEMNetworkPlugAndPlayTemplateProperties {
         $ConfigProperties
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/template-config'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/template-config'
 
     $requestObject = @(
         @{
@@ -830,7 +830,7 @@ Function Set-APICEMNetworkPlugAndPlayTemplateProperties {
         The GUID of the template config to apply to the device
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         $parameters = @{
             HasAAA = '262'
             HostName = 'PIZZAHUT'
@@ -846,7 +846,7 @@ Function Set-APICEMNetworkPlugAndPlayTemplateProperties {
 Function Add-APICEMNetworkPlugAndPlayProjectDevice {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -876,13 +876,13 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
         [string]$TemplateConfigId
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/pnp-project/' + $ProjectID + '/device'
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-project/' + $ProjectID + '/device'
 
     $deviceSettings = New-Object -TypeName 'PSCustomObject'
     if(-not [string]::IsNullOrEmpty($HasAAA)) { Add-Member -InputObject $deviceSettings -Name 'hasAAA' -Value $HasAAA -MemberType NoteProperty }
-    if(-not [string]::IsNullOrEmpty($HostName)) { Add-Member -InputObject $deviceSettings -Name 'hostName' -Value $HostName -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($Hostname)) { Add-Member -InputObject $deviceSettings -Name 'hostName' -Value $Hostname -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($PlatformId)) { Add-Member -InputObject $deviceSettings -Name 'platformId' -Value $PlatformId -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($SerialNumber)) { Add-Member -InputObject $deviceSettings -Name 'serialNumber' -Value $SerialNumber -MemberType NoteProperty }
     if($PSBoundParameters.ContainsKey('PkiEnabled')) { Add-Member -InputObject $deviceSettings -Name 'pkiEnabled' -Value $PkiEnabled -MemberType NoteProperty }

@@ -10,7 +10,7 @@ Function Add-APICEMClaimedDevice
 {
     Param(
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -31,7 +31,7 @@ Function Add-APICEMClaimedDevice
         [string]$HasAAA,
 
         [Parameter(Mandatory)]
-        [string]$HostName,
+        [string]$Hostname,
 
         [Parameter()]
         [bool]$PkiEnabled,
@@ -40,18 +40,20 @@ Function Add-APICEMClaimedDevice
         [bool]$SudiRequired
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
+    Write-Host "Finding network device"
     # Get the plug and play network device object corresponding to the device serial number
-    $plugAndPlayDevice = Get-APICEMNetworkPlugAndPlayDevice -SerialNumber $SerialNumber
+    $plugAndPlayDevice = Get-APICEMNetworkPlugAndPlayDevice @session -SerialNumber $SerialNumber
     if($null -eq $plugAndPlayDevice) {
         throw [System.Exception]::new(
             'Could not find APIC-EM Plug and Play network device [' + $SerialNumber + ']'
         )
     }
 
+    Write-Host "Getting plug and play file template"
     # Get a handle to the file template corresponding to the given file name
-    $fileTemplate = Get-APICEMNetworkPlugAndPlayFileTemplate -Name $TemplateFilename
+    $fileTemplate = Get-APICEMNetworkPlugAndPlayFileTemplate @session -Name $TemplateFilename
 
     if($null -eq $fileTemplate) {
         throw [System.IO.FileNoteFoundException]::new(
@@ -60,7 +62,7 @@ Function Add-APICEMClaimedDevice
     }
 
     # Get the template object referred to by the file template object
-    $template = Get-APICEMNetworkPlugAndPlayTemplate -FileID $fileTemplates.id
+    $template = Get-APICEMNetworkPlugAndPlayTemplate @session -FileID $fileTemplates.id
     if($null -eq $template) {
         throw [System.Exception]::new(
             'Fatal error, could not find PnP template referenced by PnP template file [' + $TemplateFileName + ']' 
@@ -72,8 +74,8 @@ Function Add-APICEMClaimedDevice
     # $requiredConfigValues = (Get-VelocityDocumentInformation -Source $fileContents).UnsetVariables
 
     # Create a template configuration that links a template and a set of configuration properties
-    $templateConfigJob = Set-APICEMNetworkPlugAndPlayTemplateProperties -TemplateID $template.id -ConfigProperties $ConfigProperties
-    $templateConfigStatus = Wait-APICEMTaskEnded -TaskID $templateConfigJob.taskId
+    $templateConfigJob = Set-APICEMNetworkPlugAndPlayTemplateProperties @session -TemplateID $template.id -ConfigProperties $ConfigProperties
+    $templateConfigStatus = Wait-APICEMTaskEnded @session -TaskID $templateConfigJob.taskId
 
     # If the template configuration failed to create, throw and exception
     if($null -eq $templateConfigStatus) {
@@ -86,7 +88,7 @@ Function Add-APICEMClaimedDevice
     $templateConfigJobResult = ConvertFrom-JSON $templateConfigStatus.progress
 
     # Verify the existance of the newly created template configuration
-    $templateConfig = Get-APICEMNetworkPlugAndPlayTemplateConfig -ConfigID $templateConfigJobResult.id
+    $templateConfig = Get-APICEMNetworkPlugAndPlayTemplateConfig @session -ConfigID $templateConfigJobResult.id
 
     if($null -eq $templateConfig) {
         throw [System.Exception]::new(
@@ -95,7 +97,7 @@ Function Add-APICEMClaimedDevice
     }
     
     # Get the plug and play project information
-    $project = Get-APICEMNetworkPlugAndPlayProject -Name $ProjectName
+    $project = Get-APICEMNetworkPlugAndPlayProject @session -Name $ProjectName
     
     if($null -eq $project) {
         throw [System.Exception]::new(
@@ -106,16 +108,16 @@ Function Add-APICEMClaimedDevice
     # Claim the device
     $claimDeviceParameters = @{
         ProjectID = $project.id 
-        HostName = $HostName
+        HostName = $Hostname
         PlatformId = $plugAndPlayDevice.platformId 
         SerialNumber = $SerialNumber 
         PkiEnabled = $PkiEnabled 
         SudiRequired = $SudiRequired 
         TemplateConfigId = $templateConfig.id
     }
-    $claimDeviceJob = Add-APICEMNetworkPlugAndPlayProjectDevice @claimDeviceParameters
 
-    $claimDeviceStatus = Wait-APICEMTaskEnded -TaskID $claimDeviceJob.taskId
+    $claimDeviceJob = Add-APICEMNetworkPlugAndPlayProjectDevice @session @claimDeviceParameters
+    $claimDeviceStatus = Wait-APICEMTaskEnded @session -TaskID $claimDeviceJob.taskId
 
     if($null -eq $claimDeviceStatus) {
         throw [System.Exception]::new(
@@ -123,6 +125,7 @@ Function Add-APICEMClaimedDevice
         )
     }
 
+    # Extract the job result from the task status
     $claimDeviceJobResult = ConvertFrom-JSON $claimDeviceStatus.progress
     
     return $claimDeviceJobResult

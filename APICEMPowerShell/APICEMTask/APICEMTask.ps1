@@ -15,14 +15,14 @@
         Specified whether to return just the task or the entire task tree
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMTask -TaskID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a'
         Remove-APICEMServiceTicket 
 #>
 Function Get-APICEMTask {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -34,9 +34,9 @@ Function Get-APICEMTask {
         [switch]$Tree
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.Host + '/api/v1/task/' + $TaskID
+    $uri = 'https://' + $session.ApicHost + '/api/v1/task/' + $TaskID
 
     if($Tree) {
         $uri += '/tree'

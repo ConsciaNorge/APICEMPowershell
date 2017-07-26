@@ -42,6 +42,7 @@ Function Internal-APICEMGetRequest {
         [switch]$Raw
     )
 
+    
     if ([string]::IsNullOrEmpty($ServiceTicket)) {
         if($null -eq $script:InternalAPICEMSession) {
             throw [System.Security.SecurityException]::new(
@@ -297,7 +298,7 @@ Function Internal-APICEMDeleteRequest {
         no return value
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345' -Passthru
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345' -Passthru
 
     .NOTES
         This function doesn't follow Powershell 'best practices for security and should use a PSCredentials structure instead,
@@ -306,7 +307,7 @@ Function Internal-APICEMDeleteRequest {
 Function Get-APICEMServiceTicket {
     Param (
         [Parameter(Mandatory)]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter(Mandatory)]
         [string]$Username,
@@ -344,7 +345,7 @@ Function Get-APICEMServiceTicket {
     # Create the parameters necessary to make the request against the server
     $parameters = @{
         Method = 'Post'
-        Uri = 'https://' + $HostIP + '/api/v1/ticket'
+        Uri = 'https://' + $ApicHost + '/api/v1/ticket'
         Headers = $headers
         Body = ConvertTo-Json -InputObject $requestBody
     }
@@ -366,8 +367,8 @@ Function Get-APICEMServiceTicket {
         return $result.response.serviceTicket
     }
 
-$script:InternalAPICEMSession = @{
-        Host = $HostIP
+    $script:InternalAPICEMSession = @{
+        ApicHost = $ApicHost
         ServiceTicket = $result.response.serviceTicket
     }
 }
@@ -375,23 +376,23 @@ $script:InternalAPICEMSession = @{
 Function Internal-APICEMHostIPAndServiceTicket {
     Param(
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
     # If the HostIP and ServiceTicket are provided 
-    if((-not [string]::IsNullOrEmpty($HostIP)) -and (-not [string]::IsNullOrEmpty($ServiceTicket))) {
+    if((-not [string]::IsNullOrEmpty($ApicHost)) -and (-not [string]::IsNullOrEmpty($ServiceTicket))) {
         # Return the provided HostIP and ServiceTicket
         return @{
-            Host = $HostIP
+            ApicHost = $ApicHost
             ServiceTicket = $ServiceTicket
         }
     } 
     
     # If either the HostIP or the ServiceTicket are provided
-    if((-not [string]::IsNullOrEmpty($HostIP)) -or (-not [string]::IsNullOrEmpty($ServiceTicket))) {
+    if((-not [string]::IsNullOrEmpty($ApicHost)) -or (-not [string]::IsNullOrEmpty($ServiceTicket))) {
         throw [System.ArgumentException]::new(
             'When using argument HostIP or ServiceTicket it is necessary to use both'
         )
@@ -406,7 +407,7 @@ Function Internal-APICEMHostIPAndServiceTicket {
 
     # Return the stored Host and ServiceTicket
     return @{
-        Host = $script:InternalAPICEMSession.Host
+        ApicHost = $script:InternalAPICEMSession.ApicHost
         ServiceTicket = $script:InternalAPICEMSession.ServiceTicket
     }
 }
@@ -422,21 +423,21 @@ Function Internal-APICEMHostIPAndServiceTicket {
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Remove-APICEMServiceTicket  
 #>
 Function Remove-APICEMServiceTicket {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket
 
-    $response = Internal-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/ticket/' + $session.ServiceTicket)
+    $response = Internal-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/ticket/' + $session.ServiceTicket)
 
     $script:InternalAPICEMSession = $null
 

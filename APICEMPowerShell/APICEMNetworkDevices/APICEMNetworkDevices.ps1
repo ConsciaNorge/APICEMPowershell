@@ -10,21 +10,21 @@
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDevices -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDevices -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket
 #>
 Function Get-APICEMNetworkDevices {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device')
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device')
 
     return $response
 }
@@ -43,13 +43,13 @@ Function Get-APICEMNetworkDevices {
         The serial number of the device (usually starts with an F)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDevice -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket -SerialNumber 'FDO1441P08L'
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDevice -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -SerialNumber 'FDO1441P08L'
 #>
 Function Get-APICEMNetworkDevice {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -58,9 +58,9 @@ Function Get-APICEMNetworkDevice {
         [string]$SerialNumber
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/serial-number/' + $SerialNumber)
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/serial-number/' + $SerialNumber)
 
     return $response
 }
@@ -79,13 +79,13 @@ Function Get-APICEMNetworkDevice {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceConfig -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceConfig -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
 #>
 Function Get-APICEMNetworkDeviceConfig {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -94,9 +94,9 @@ Function Get-APICEMNetworkDeviceConfig {
         [string]$DeviceId
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/config?id=' + $DeviceID)
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/config?id=' + $DeviceID)
 
     return $response.RunningConfig
 }
@@ -115,13 +115,13 @@ Function Get-APICEMNetworkDeviceConfig {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceModules -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceModules -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
 #>
 Function Get-APICEMNetworkDeviceModules {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -130,9 +130,9 @@ Function Get-APICEMNetworkDeviceModules {
         [string]$DeviceId
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/module?deviceId=' + $DeviceID)
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/module?deviceId=' + $DeviceID)
 
     return $response
 }
@@ -151,8 +151,8 @@ Function Get-APICEMNetworkDeviceModules {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceManagementInfo -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceManagementInfo -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
 
     .NOTES
         Be aware that the structure returned here contains passwords for SSH and SNMP. It is recommended to only execute this command if
@@ -161,7 +161,7 @@ Function Get-APICEMNetworkDeviceModules {
 Function Get-APICEMNetworkDeviceManagementInfo {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -170,9 +170,9 @@ Function Get-APICEMNetworkDeviceManagementInfo {
         [string]$DeviceId
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/management-info?id=' + $DeviceID)
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/management-info?id=' + $DeviceID)
 
     return $response
 }
@@ -191,13 +191,13 @@ Function Get-APICEMNetworkDeviceManagementInfo {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -HostIP 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceLocation -HostIP 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceLocation -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
 #>
 Function Get-APICEMNetworkDeviceLocation {
     Param (
         [Parameter()]
-        [string]$HostIP,
+        [string]$ApicHost,
 
         [Parameter()]
         [string]$ServiceTicket,
@@ -206,9 +206,9 @@ Function Get-APICEMNetworkDeviceLocation {
         [string]$DeviceId
     )
 
-    $session = Internal-APICEMHostIPAndServiceTicket -HostIP $HostIP -ServiceTicket $ServiceTicket        
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.Host + '/api/v1/network-device/location?id=' + $DeviceID)
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/location?id=' + $DeviceID)
 
     return $response
 }
