@@ -988,3 +988,77 @@ Function Get-APICEMNetworkPlugAndPlayImageDefault {
 
     return $response
 }
+
+<#
+    .SYNOPSIS
+        Creates a new APIC-EM PnP project
+
+    .PARAMETER ApicHost
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER Name
+        The name of the project
+
+    .PARAMETER ProvisionedBy
+        The name of the user who provisioned the project
+
+    .PARAMETER TFTPServer
+        TFTP Server Host name or IP
+
+    .PARAMETER TFTPPath
+        TFTP Server path
+
+    .PARAMETER Notes
+        Notes to be stored with the project
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        $newProjectJob = New-APICEMNetworkPlugAndPlayProject -Name 'Minions'
+        Remove-APICEMServiceTicket
+#>
+Function New-APICEMNetworkPlugAndPlayProject {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter(Mandatory)]
+        [string]$Name,
+
+        [Parameter()]
+        [string]$ProvisionedBy,
+
+        [Parameter()]
+        [string]$TFTPServer,
+
+        [Parameter()]
+        [string]$TFTPPath,
+
+        [Parameter()]
+        [string]$Notes
+    )
+
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-project'
+
+    $site = New-Object -TypeName 'PSCustomObject'
+    if(-not [string]::IsNullOrEmpty($Name)) { Add-Member -InputObject $site -Name 'siteName' -Value $Name -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($ProvisionedBy)) { Add-Member -InputObject $site -Name 'provisionedBy' -Value $ProvisionedBy -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($TFTPServer)) { Add-Member -InputObject $site -Name 'tftpServer' -Value $TFTPServer -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($TFTPPath)) { Add-Member -InputObject $site -Name 'tftpPath' -Value $TFTPPath -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($Notes)) { Add-Member -InputObject $site -Name 'note' -Value $Notes -MemberType NoteProperty }
+
+    $requestObject = @(
+        $site
+    )
+
+    $response = Internal-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+
+    return $response
+}

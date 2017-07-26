@@ -38,6 +38,7 @@ Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayTemplate
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayTemplateConfig
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayTemplateConfigs
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayTemplates
+Export-ModuleMember -Function New-APICEMNetworkPlugAndPlayProject
 Export-ModuleMember -Function Render-APICEMNetworkPlugAndPlayFileTemplate
 Export-ModuleMember -Function Set-APICEMNetworkPlugAndPlayTemplateProperties
 
