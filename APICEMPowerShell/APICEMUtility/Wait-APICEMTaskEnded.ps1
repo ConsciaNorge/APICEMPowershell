@@ -35,7 +35,6 @@ Function Wait-APICEMTaskEnded {
             (($taskStatusTree | Get-Member | Where-Object { $_.Name -eq 'endTime' }).Count -eq 0)
     ) {
         Start-Sleep -Seconds $RefreshIntervalSeconds
-        Write-ApicHost 'Slept for a second'
         $taskStatusTree = Get-APICEMTask @session -TaskID $TaskId -Tree
         $timeNow = [DateTime]::Now
     }

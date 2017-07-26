@@ -25,6 +25,8 @@ Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayDevice
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayDeviceHistory
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayDevices
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayFileTemplates
+Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayImageDefault
+Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayImages
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayPlatformFiles
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayProject
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayProjectDevice

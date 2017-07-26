@@ -5,6 +5,8 @@
     .NOTES
         This is not an APIC-EM API, it is a utility command that is built upon
         APIC-EM API primitives.
+
+        Got some help here from https://communities.cisco.com/servlet/JiveServlet/showImage/38-8381-102160/summary-api.png
 #>
 Function Add-APICEMClaimedDevice
 {
@@ -37,12 +39,14 @@ Function Add-APICEMClaimedDevice
         [bool]$PkiEnabled,
 
         [Parameter()]
-        [bool]$SudiRequired
+        [bool]$SudiRequired,
+
+        [Parameter()]
+        [switch]$UseDefaultImage
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    Write-Host "Finding network device"
     # Get the plug and play network device object corresponding to the device serial number
     $plugAndPlayDevice = Get-APICEMNetworkPlugAndPlayDevice @session -SerialNumber $SerialNumber
     if($null -eq $plugAndPlayDevice) {
@@ -51,7 +55,16 @@ Function Add-APICEMClaimedDevice
         )
     }
 
-    Write-Host "Getting plug and play file template"
+    # Get the default image id if it is available    
+    $imageId = $null
+    if($UseDefaultImage) {
+        # TODO : Trim -S (license info) from end if necessary 
+        $defaultImage = Get-APICEMNetworkPlugAndPlayImageDefault @session -ProductID $plugAndPlayDevice.platformId
+        if($null -ne $defaultImage) {
+            $imageId = $defaultImage.imageId
+        }
+    }
+
     # Get a handle to the file template corresponding to the given file name
     $fileTemplate = Get-APICEMNetworkPlugAndPlayFileTemplate @session -Name $TemplateFilename
 
@@ -105,7 +118,7 @@ Function Add-APICEMClaimedDevice
         )
     }
 
-    # Claim the device
+    # Prepare the argument splat for claiming the device
     $claimDeviceParameters = @{
         ProjectID = $project.id 
         HostName = $Hostname
@@ -114,8 +127,10 @@ Function Add-APICEMClaimedDevice
         PkiEnabled = $PkiEnabled 
         SudiRequired = $SudiRequired 
         TemplateConfigId = $templateConfig.id
+        ImageId = $imageId
     }
 
+    # Claim the device
     $claimDeviceJob = Add-APICEMNetworkPlugAndPlayProjectDevice @session @claimDeviceParameters
     $claimDeviceStatus = Wait-APICEMTaskEnded @session -TaskID $claimDeviceJob.taskId
 

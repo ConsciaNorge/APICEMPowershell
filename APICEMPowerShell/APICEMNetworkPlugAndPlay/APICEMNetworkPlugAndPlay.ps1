@@ -2,7 +2,7 @@
     .SYNOPSIS
         Returns a list of network plug and play device by device ID
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -53,7 +53,7 @@ Function Get-APICEMNetworkPlugAndPlayDevice {
     .SYNOPSIS
         Returns a list of network plug and play devices
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -92,7 +92,7 @@ Function Get-APICEMNetworkPlugAndPlayDevices {
     .SYNOPSIS
         Returns a plug and play device's history by its serial number
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -129,7 +129,7 @@ Function Get-APICEMNetworkPlugAndPlayDeviceHistory {
     .SYNOPSIS
         Returns a list of network plug and play device templates
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -159,7 +159,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplates {
     .SYNOPSIS
         Returns a network plug and play device template
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -210,7 +210,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplate {
     .SYNOPSIS
         Returns a list of network plug and play device template files
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -244,7 +244,7 @@ Function Get-APICEMNetworkPlugAndPlayFileTemplates {
     .SYNOPSIS
         Returns a network plug and play device template file
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -299,7 +299,7 @@ Function Get-APICEMNetworkPlugAndPlayFileTemplate {
     .SYNOPSIS
         Returns a list of APIC-EM registered projects
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -330,7 +330,7 @@ Function Get-APICEMNetworkPlugAndPlayProjects {
     .SYNOPSIS
         Returns a specific APIC-EM registered project
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -385,7 +385,7 @@ Function Get-APICEMNetworkPlugAndPlayProject {
     .SYNOPSIS
         Returns the devices associated with a plug and play project
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -424,7 +424,7 @@ Function Get-APICEMNetworkPlugAndPlayProjectDevices {
     .SYNOPSIS
         Returns the device associated with a plug and play project and device id
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -469,7 +469,7 @@ Function Get-APICEMNetworkPlugAndPlayProjectDevice {
     .SYNOPSIS
         Returns a list of APIC-EM plug and play platform files
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -500,7 +500,7 @@ Function Get-APICEMNetworkPlugAndPlayPlatformFiles {
     .SYNOPSIS
         Returns a list of APIC-EM plug and play active rendered templates in the cache
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -531,7 +531,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateRenderers {
     .SYNOPSIS
         Returns a list of APIC-EM plug and play active rendered template in the cache by ID
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -570,7 +570,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateRenderer {
     .SYNOPSIS
         Renders an APIC-EM Template with the given parameters
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -626,7 +626,7 @@ Function Render-APICEMNetworkPlugAndPlayFileTemplate {
     .SYNOPSIS
         Returns a list of APIC-EM plug and play template configs
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -657,7 +657,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfigs {
     .SYNOPSIS
         Returns a list of APIC-EM plug and play template configs
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -688,7 +688,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfigs {
     .SYNOPSIS
         Returns an APIC-EM plug and play template config
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -743,7 +743,7 @@ Function Get-APICEMNetworkPlugAndPlayTemplateConfig {
     .SYNOPSIS
         Sets the configuration properties for an APIC-EM plug and play template
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -799,7 +799,7 @@ Function Set-APICEMNetworkPlugAndPlayTemplateProperties {
     .SYNOPSIS
         Claims a plug and play device within a project (Create a new device under a given project)
 
-    .PARAMETER HostIP
+    .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
 
     .PARAMETER ServiceTicket
@@ -828,6 +828,9 @@ Function Set-APICEMNetworkPlugAndPlayTemplateProperties {
 
     .PARAMETER TemplateConfigID
         The GUID of the template config to apply to the device
+
+    .PARAMETER ImageId
+        The ImageId (GUID) of the IOS (or other firmware) to apply to the claimed device
 
     .EXAMPLE
         Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
@@ -873,7 +876,10 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
         [bool]$SudiRequired,
 
         [Parameter()]
-        [string]$TemplateConfigId
+        [string]$TemplateConfigId,
+
+        [Parameter()]
+        [string]$ImageId
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
@@ -888,12 +894,97 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
     if($PSBoundParameters.ContainsKey('PkiEnabled')) { Add-Member -InputObject $deviceSettings -Name 'pkiEnabled' -Value $PkiEnabled -MemberType NoteProperty }
     if($PSBoundParameters.ContainsKey('SudiRequired')) { Add-Member -InputObject $deviceSettings -Name 'sudiRequired' -Value $SudiRequired -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($TemplateConfigId)) { Add-Member -InputObject $deviceSettings -Name 'templateConfigId' -Value $TemplateConfigId -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($ImageId)) { Add-Member -InputObject $deviceSettings -Name 'imageId' -Value $ImageId -MemberType NoteProperty }
 
     $requestObject = @(
         $deviceSettings
     )
 
     $response = Internal-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+
+    return $response
+}
+
+<#
+    .SYNOPSIS
+        Returns a list of images and the platforms for which they are a default
+
+    .PARAMETER ApicHost
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkPlugAndPlayImages
+        Remove-APICEMServiceTicket
+#>
+Function Get-APICEMNetworkPlugAndPlayImages {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket
+    )
+
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-file/image'
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+
+    return $response.images
+}
+
+<#
+    .SYNOPSIS
+        Returns the default image for a given platform or product ID
+
+    .PARAMETER ApicHost
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER PlatformID
+        The name of the platform (example C3850)
+
+    .PARAMETER ProductID
+        The name of the product (example WS-C3850-24P)
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkPlugAndPlayImageDefault
+        Remove-APICEMServiceTicket
+#>
+Function Get-APICEMNetworkPlugAndPlayImageDefault {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter()]
+        [string]$PlatformID,
+
+        [Parameter()]
+        [string]$ProductID
+    )
+
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-file/image/default'
+
+    if(-not [string]::IsNullOrEmpty($PlatformID)) {
+        $uri += '?platformId=' + $PlatformID
+    } elseif (-not [string]::IsNullOrEmpty($ProductID)) {
+        $uri += '?productId=' + $ProductID
+    }
+
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
 
     return $response
 }

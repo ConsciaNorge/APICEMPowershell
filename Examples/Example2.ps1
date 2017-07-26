@@ -71,7 +71,7 @@ Function Add-APICEMClaimDeviceWithTemplate
         SudiRequired       = $unclaimedDevice.sudiRequired
     }
 
-    return Add-APICEMClaimedDevice @claimDeviceParams 
+    return Add-APICEMClaimedDevice @claimDeviceParams -UseDefaultImage
 }
 
 # Get the service ticket which is basically a session token... kind of like a cookie
