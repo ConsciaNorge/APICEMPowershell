@@ -44,6 +44,12 @@ Export-ModuleMember -Function Get-APICEMNetworkDeviceModules
 Export-ModuleMember -Function Get-APICEMNetworkDeviceManagementInfo
 Export-ModuleMember -Function Set-APICEMNetworkDeviceRole
 
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryDiscovery.ps1')
+Export-ModuleMember -Function New-APICEMInventoryDiscovery
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryDeviceCredential.ps1')
+Export-ModuleMember -Function Get-APICEMInventoryGlobalCredential
+
 . (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryLocation.ps1')
 Export-ModuleMember -Function Get-APICEMInventoryLocation
 Export-ModuleMember -Function Get-APICEMInventoryLocations

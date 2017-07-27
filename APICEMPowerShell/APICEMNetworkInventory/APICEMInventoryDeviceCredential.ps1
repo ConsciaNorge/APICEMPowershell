@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 <#
     .SYNOPSIS
-        Returns an APIC-EM task by ID
+        Returns the requested credential
 
     .PARAMETER HostIP
         The IP address (or resolvable FQDN) of the APIC-EM server
@@ -33,18 +33,24 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     .PARAMETER ServiceTicket
         The service ticket issued by a call to Get-APICEMServiceTicket
 
-    .PARAMETER TaskID
-        The ID of the task to get status information about
+    .PARAMETER CLI
+        Specifies that the global CLI credential is being requested
 
-    .PARAMETER Tree
-        Specified whether to return just the task or the entire task tree
+    .PARAMETER SNMPv2Read
+        Specifies that the SNMPv2 read credential is being requested
+
+    .PARAMETER SNMPv2Write
+        Specifies that the SNMPv2 write credential is being requested
+
+    .PARAMETER SNMPv3
+        Specifies that the SNMPv3 credential is being requested
 
     .EXAMPLE
         Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMTask -TaskID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a'
+        Get-APICEMInventoryGlobalCredential -CLI
         Remove-APICEMServiceTicket 
 #>
-Function Get-APICEMTask {
+Function Get-APICEMInventoryGlobalCredential {
     Param (
         [Parameter()]
         [string]$ApicHost,
@@ -52,19 +58,35 @@ Function Get-APICEMTask {
         [Parameter()]
         [string]$ServiceTicket,
 
-        [Parameter(Mandatory)]
-        [string]$TaskID,
+        [Parameter()]
+        [switch]$CLI,
 
         [Parameter()]
-        [switch]$Tree
+        [switch]$SNMPv2Read,
+
+        [Parameter()]
+        [switch]$SNMPv2Write,
+
+        [Parameter()]
+        [switch]$SNMPv3
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $uri = 'https://' + $session.ApicHost + '/api/v1/task/' + $TaskID
+    $uri  = 'https://' + $session.ApicHost + '/api/v1/global-credential'
 
-    if($Tree) {
-        $uri += '/tree'
+    if($CLI) {
+        $uri += '?credentialSubType=CLI'
+    } elseif ($SNMPv2Read) {
+        $uri += '?credentialSubType=SNMPV2_READ_COMMUNITY'        
+    } elseif ($SNMPv2Write) {
+        $uri += '?credentialSubType=SNMPV2_WRITE_COMMUNITY'        
+    } elseif ($SNMPv3) {
+        $uri += '?credentialSubType=SNMPV3'        
+    } else {
+        throw [System.ArgumentException]::new(
+            'You must specify at least one switch for what type of credential to return'
+        )
     }
 
     $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
