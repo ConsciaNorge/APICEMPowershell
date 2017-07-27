@@ -9,7 +9,7 @@ Export-ModuleMember -Function Get-APICEMFile
 Export-ModuleMember -Function Get-APICEMFileNamespace
 Export-ModuleMember -Function Get-APICEMFileNamespaces
 
-. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkDevices/APICEMNetworkDevices.ps1')
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryNetworkDevices.ps1')
 
 Export-ModuleMember -Function Get-APICEMNetworkDevice
 Export-ModuleMember -Function Get-APICEMNetworkDevices
@@ -17,6 +17,12 @@ Export-ModuleMember -Function Get-APICEMNetworkDeviceConfig
 Export-ModuleMember -Function Get-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Get-APICEMNetworkDeviceModules
 Export-ModuleMember -Function Get-APICEMNetworkDeviceManagementInfo
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryLocation.ps1')
+Export-ModuleMember -Function Get-APICEMInventoryLocation
+Export-ModuleMember -Function Get-APICEMInventoryLocations
+Export-ModuleMember -Function New-APICEMInventoryLocation
+Export-ModuleMember -Function Remove-APICEMInventoryLocation
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkPlugAndPlay/APICEMNetworkPlugAndPlay.ps1')
 
