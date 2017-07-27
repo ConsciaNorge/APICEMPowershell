@@ -46,6 +46,9 @@ Function Get-APICEMInventoryLocations {
     .PARAMETER Name
         The name of the location to return
 
+    .PARAMETER Tag
+        The tag to get the location(s) by
+    
     .EXAMPLE
         Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         Get-APICEMInventoryLocation -Name 'Minionville'
@@ -63,6 +66,9 @@ Function Get-APICEMInventoryLocation {
         [string]$Name,
 
         [Parameter()]
+        [string]$Tag,
+
+        [Parameter()]
         [string]$LocationID
     )
 
@@ -73,6 +79,8 @@ Function Get-APICEMInventoryLocation {
     if(-not [string]::IsNullOrEmpty($Name)) {
         $uri += '/location-name/' + $Name
     } elseif(-not [string]::IsNullOrEmpty($LocationID)) {
+        $uri += '/' + $LocationID
+    } elseif(-not [string]::IsNullOrEmpty($Tag)) {
         $uri += '/' + $LocationID
     } else {
         throw [System.ArgumentException]::new(
@@ -148,7 +156,7 @@ Function New-APICEMInventoryLocation {
     if(-not [string]::IsNullOrEmpty($Description)) { Add-Member -InputObject $location -Name 'description' -Value $Description -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($CivicAddress)) { Add-Member -InputObject $location -Name 'civicAddress' -Value $CivicAddress -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($GeopgraphicAddress)) { Add-Member -InputObject $location -Name 'geographicAddress' -Value $TFTPPath -MemberType NoteProperty }
-    if(-not [string]::IsNullOrEmpty($Tag)) { Add-Member -InputObject $location -Name 'tag' -Value $Notes -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($Tag)) { Add-Member -InputObject $location -Name 'tag' -Value $Tag -MemberType NoteProperty }
 
     $requestObject = $location
 

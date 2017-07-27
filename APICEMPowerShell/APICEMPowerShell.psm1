@@ -24,6 +24,21 @@ Export-ModuleMember -Function Get-APICEMInventoryLocations
 Export-ModuleMember -Function New-APICEMInventoryLocation
 Export-ModuleMember -Function Remove-APICEMInventoryLocation
 
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryLocation.ps1')
+Export-ModuleMember -Function Get-APICEMInventoryLocation
+Export-ModuleMember -Function Get-APICEMInventoryLocations
+Export-ModuleMember -Function New-APICEMInventoryLocation
+Export-ModuleMember -Function Remove-APICEMInventoryLocation
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryTag.ps1')
+Export-ModuleMember -Function Get-APICEMInventoryTagAssociations
+Export-ModuleMember -Function Get-APICEMInventoryTag
+Export-ModuleMember -Function Get-APICEMInventoryTags
+Export-ModuleMember -Function New-APICEMInventoryTag
+Export-ModuleMember -Function New-APICEMInventoryTagAssociation
+Export-ModuleMember -Function Remove-APICEMInventoryTag
+Export-ModuleMember -Function Remove-APICEMInventoryTagAssociation
+
 . (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkPlugAndPlay/APICEMNetworkPlugAndPlay.ps1')
 
 Export-ModuleMember -Function Add-APICEMNetworkPlugAndPlayProjectDevice
