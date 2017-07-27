@@ -832,6 +832,9 @@ Function Set-APICEMNetworkPlugAndPlayTemplateProperties {
     .PARAMETER ImageId
         The ImageId (GUID) of the IOS (or other firmware) to apply to the claimed device
 
+    .PARAMETER Role
+        The device role as it should be configured in the inventory (ACCESS/DISTRIBUTION/CORE)
+
     .EXAMPLE
         Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
         $parameters = @{
@@ -879,7 +882,10 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
         [string]$TemplateConfigId,
 
         [Parameter()]
-        [string]$ImageId
+        [string]$ImageId,
+
+        [Parameter()]
+        [string]$DeviceRole
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
@@ -895,6 +901,7 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
     if($PSBoundParameters.ContainsKey('SudiRequired')) { Add-Member -InputObject $deviceSettings -Name 'sudiRequired' -Value $SudiRequired -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($TemplateConfigId)) { Add-Member -InputObject $deviceSettings -Name 'templateConfigId' -Value $TemplateConfigId -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($ImageId)) { Add-Member -InputObject $deviceSettings -Name 'imageId' -Value $ImageId -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($DeviceRole)) { Add-Member -InputObject $deviceSettings -Name 'role' -Value $DeviceRole -MemberType NoteProperty }
 
     $requestObject = @(
         $deviceSettings

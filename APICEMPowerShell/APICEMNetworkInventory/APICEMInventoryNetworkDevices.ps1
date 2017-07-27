@@ -10,8 +10,9 @@
         The service ticket issued by a call to Get-APICEMServiceTicket
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDevices -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDevices
+        Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkDevices {
     Param (
@@ -43,8 +44,9 @@ Function Get-APICEMNetworkDevices {
         The serial number of the device (usually starts with an F)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDevice -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -SerialNumber 'FDO1441P08L'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDevice -SerialNumber 'FDO1441P08L'
+        Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkDevice {
     Param (
@@ -79,8 +81,9 @@ Function Get-APICEMNetworkDevice {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceConfig -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceConfig -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkDeviceConfig {
     Param (
@@ -115,8 +118,9 @@ Function Get-APICEMNetworkDeviceConfig {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceModules -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceModules -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkDeviceModules {
     Param (
@@ -151,8 +155,9 @@ Function Get-APICEMNetworkDeviceModules {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceManagementInfo -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceManagementInfo -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Remove-APICEMServiceTicket
 
     .NOTES
         Be aware that the structure returned here contains passwords for SSH and SNMP. It is recommended to only execute this command if
@@ -191,8 +196,9 @@ Function Get-APICEMNetworkDeviceManagementInfo {
         The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices)
 
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkDeviceLocation -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkDeviceLocation -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkDeviceLocation {
     Param (
@@ -209,6 +215,66 @@ Function Get-APICEMNetworkDeviceLocation {
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
     $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/location?id=' + $DeviceID)
+
+    return $response
+}
+
+<#
+    .SYNOPSIS
+        Configures the role of a network device.
+
+    .PARAMETER HostIP
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER DeviceId
+        The GUID representing the switch
+
+    .PARAMETER DeviceRole
+        The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevices). If this
+        value is missing, then the device role source will be configured as Auto. Otherwise it will be configured as
+        manual.
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Set-APICEMNetworkDeviceRole -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1' -DeviceRole 'DISTRIBUTION'
+        Remove-APICEMServiceTicket
+#>
+Function Set-APICEMNetworkDeviceRole {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter(Mandatory)]
+        [string]$DeviceId,
+
+        [Parameter()]
+        [string]$DeviceRole
+    )
+
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/network-device/brief'
+
+    $deviceBrief = New-Object -TypeName 'PSCustomObject'
+    if(-not [string]::IsNullOrEmpty($DeviceId)) { Add-Member -InputObject $deviceBrief -Name 'id' -Value $DeviceID -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($DeviceRole)) 
+    { 
+        Add-Member -InputObject $deviceBrief -Name 'roleSource' -Value 'MANUAL' -MemberType NoteProperty 
+        Add-Member -InputObject $deviceBrief -Name 'role' -Value ($DeviceRole.ToUpper()) -MemberType NoteProperty 
+    } else  { 
+        Add-Member -InputObject $deviceBrief -Name 'roleSource' -Value 'AUTO' -MemberType NoteProperty 
+        Add-Member -InputObject $deviceBrief -Name 'role' -Value 'UNKNOWN' -MemberType NoteProperty 
+    }
+
+    $requestObject = $deviceBrief
+    
+    $response = Internal-APICEMPutRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
 
     return $response
 }
