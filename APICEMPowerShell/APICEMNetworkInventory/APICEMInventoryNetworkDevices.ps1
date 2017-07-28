@@ -80,13 +80,37 @@ Function Get-APICEMNetworkDevice {
         [Parameter()]
         [string]$ServiceTicket,
 
-        [Parameter(Mandatory)]
-        [string]$SerialNumber
+        [Parameter()]
+        [string]$SerialNumber,
+
+        [Parameter()]
+        [string]$IPAddress,        
+
+        [Parameter()]
+        [bool]$Unreachable = $false
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/serial-number/' + $SerialNumber)
+    $uri = 'https://' + $session.ApicHost + '/api/v1/network-device'
+    
+    if(-not [string]::IsNullOrEmpty($SerialNumber)) {
+        $uri += '/serial-number/' + $SerialNumber
+    } elseif(-not [string]::IsNullOrEmpty($IPAddress)) {
+        $uri += '/ip-address/' + $IPAddress
+    } else {
+        throw [System.ArgumentException]::new(
+            'Either -SerialNumber or -IPAddress must be provided'
+        )
+    }
+    
+    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+
+    if($Unreachable) {
+        if(($null -ne $Unreachable) -and ($response.reachabilityStatus -ne 'Unreachable')) {
+            return $null
+        }
+    }
 
     return $response
 }
@@ -357,3 +381,43 @@ Function Set-APICEMNetworkDeviceLocation {
 
     return $response
 }
+
+<#
+    .SYNOPSIS
+        Removes a network device from the inventory
+
+    .PARAMETER HostIP
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER DeviceID
+        The GUID of the network device to remove
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Remove-APICEMNetworkDevice -DeviceID '0ad107df-2261-4d30-ba4b-c3a374e6b7e0'
+        Remove-APICEMServiceTicket 
+#>
+Function Remove-APICEMNetworkDevice {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter(Mandatory)]
+        [string]$DeviceID
+    )
+
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/network-device/' + $DeviceID
+
+    $response = Internal-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+
+    return $response.response
+}
+

@@ -41,6 +41,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     .PARAMETER RefreshIntervalSeconds
         The amount of time to wait between polling the status of the job
+
+    .PARAMETER Unreachable
+        Runs the scan only against unreachable devices
 #>
 Function Wait-APICEMDeviceInInventory 
 {
@@ -51,14 +54,20 @@ Function Wait-APICEMDeviceInInventory
         [Parameter()]
         [string]$ServiceTicket,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]$SerialNumber,
+
+        [Parameter()]
+        [string]$IPAddress,
 
         [Parameter()]
         [int]$TimeOutSeconds = 600,
 
         [Parameter()]
-        [int]$RefreshIntervalSeconds = 10
+        [int]$RefreshIntervalSeconds = 10,
+
+        [Parameter()]
+        [bool]$Unreachable = $false
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
@@ -67,15 +76,15 @@ Function Wait-APICEMDeviceInInventory
     [DateTime]$timeNow = [DateTime]::Now
     [DateTime]$endTime = $timeNow.AddSeconds($TimeOutSeconds)
 
-    $networkDevice = Get-APICEMNetworkDevice @session -SerialNumber $SerialNumber -ErrorAction SilentlyContinue
+    $networkDevice = Get-APICEMNetworkDevice @session -IPAddress $IPAddress -SerialNumber $SerialNumber -Unreachable $Unreachable -ErrorAction SilentlyContinue
     while(
             ($timeNow -lt $endTime) -and 
             ($null -eq $networkDevice)
     ) {
-        Write-Progress -Activity 'Inventory presence' -CurrentOperation 'Waiting for device presence in inventory' -SecondsRemaining $endTime.Subtract($timeNow).TotalSeconds
+        Write-Progress -Activity 'Inventory presence' -IPAddress $IPAddress -CurrentOperation 'Waiting for device presence in inventory' -SecondsRemaining $endTime.Subtract($timeNow).TotalSeconds
         Write-Host -NoNewline '.'
         Start-Sleep -Seconds $RefreshIntervalSeconds
-        $networkDevice = Get-APICEMNetworkDevice @session -SerialNumber $SerialNumber -ErrorAction SilentlyContinue
+        $networkDevice = Get-APICEMNetworkDevice @session -SerialNumber $SerialNumber -Unreachable $Unreachable -ErrorAction SilentlyContinue
         $timeNow = [DateTime]::Now    
     }
 

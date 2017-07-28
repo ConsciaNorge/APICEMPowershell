@@ -55,7 +55,7 @@ Function Wait-APICEMDeviceProvisioned
         [string]$SerialNumber,
 
         [Parameter()]
-        [int]$TimeOutSeconds = 600,
+        [int]$TimeOutSeconds = 3600,
 
         [Parameter()]
         [int]$RefreshIntervalSeconds = 10

@@ -44,6 +44,7 @@ Export-ModuleMember -Function Get-APICEMNetworkDeviceConfig
 Export-ModuleMember -Function Get-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Get-APICEMNetworkDeviceModules
 Export-ModuleMember -Function Get-APICEMNetworkDeviceManagementInfo
+Export-ModuleMember -Function Remove-APICEMNetworkDevice
 Export-ModuleMember -Function Set-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Set-APICEMNetworkDeviceRole
 
