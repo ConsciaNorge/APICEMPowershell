@@ -67,9 +67,6 @@ Function Add-APICEMClaimedDevice
         [bool]$SudiRequired,
 
         [Parameter()]
-        [string]$DeviceRole,
-
-        [Parameter()]
         [switch]$UseDefaultImage
     )
 
@@ -156,7 +153,6 @@ Function Add-APICEMClaimedDevice
         SudiRequired = $SudiRequired 
         TemplateConfigId = $templateConfig.id
         ImageId = $imageId
-        DeviceRole = $DeviceRole
     }
 
     # Claim the device

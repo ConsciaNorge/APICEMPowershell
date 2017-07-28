@@ -302,3 +302,58 @@ Function Set-APICEMNetworkDeviceRole {
 
     return $response
 }
+
+<#
+    .SYNOPSIS
+        Configures the location of a network device in inventory.
+
+    .PARAMETER HostIP
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER DeviceId
+        The GUID representing the switch
+
+    .PARAMETER DeviceRole
+        The role of the device within the location (access|distribution|core|border router)
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Set-APICEMNetworkDeviceLocation -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1' -LocationId '1a7f4ccc-8776-4cf1-80dd-bd25d19a22aa'
+        Remove-APICEMServiceTicket
+#>
+Function Set-APICEMNetworkDeviceLocation {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter(Mandatory)]
+        [string]$DeviceId,
+
+        [Parameter(Mandatory)]
+        [string]$LocationId,
+
+        [Parameter()]
+        [string]$DeviceRole
+    )
+
+    $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/network-device/location'
+
+    $deviceLocation = New-Object -TypeName 'PSCustomObject'
+    if(-not [string]::IsNullOrEmpty($DeviceId)) { Add-Member -InputObject $deviceLocation -Name 'id' -Value $DeviceID -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($LocationId)) { Add-Member -InputObject $deviceLocation -Name 'location' -Value $LocationId -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($DeviceRole)) { Add-Member -InputObject $deviceLocation -Name 'role' -Value ($DeviceRole.ToLower()) -MemberType NoteProperty }
+
+    $requestObject = $deviceLocation
+    
+    $response = Internal-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+
+    return $response
+}

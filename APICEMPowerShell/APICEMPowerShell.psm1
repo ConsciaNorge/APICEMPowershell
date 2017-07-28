@@ -42,10 +42,13 @@ Export-ModuleMember -Function Get-APICEMNetworkDeviceConfig
 Export-ModuleMember -Function Get-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Get-APICEMNetworkDeviceModules
 Export-ModuleMember -Function Get-APICEMNetworkDeviceManagementInfo
+Export-ModuleMember -Function Set-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Set-APICEMNetworkDeviceRole
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryDiscovery.ps1')
+Export-ModuleMember -Function Get-APICEMInventoryDiscovery
 Export-ModuleMember -Function New-APICEMInventoryDiscovery
+Export-ModuleMember -Function Set-APICEMInventoryDiscovery
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMNetworkInventory/APICEMInventoryDeviceCredential.ps1')
 Export-ModuleMember -Function Get-APICEMInventoryGlobalCredential
@@ -104,6 +107,21 @@ Export-ModuleMember -Function Add-APICEMClaimedDevice
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMUtility/Wait-APICEMTaskEnded.ps1')
 Export-ModuleMember -Function Wait-APICEMTaskEnded
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMUtility/Wait-APICEMDiscoveryComplete.ps1')
+Export-ModuleMember -Function Wait-APICEMDiscoveryComplete
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMUtility/Wait-APICEMDiscoveryCompletesWithADevice.ps1')
+Export-ModuleMember -Function Wait-APICEMDiscoveryCompletesWithADevice
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMUtility/Add-APICEMDeviceToInventory.ps1')
+Export-ModuleMember -Function Add-APICEMDeviceToInventory
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMUtility/Wait-APICEMDeviceProvisioned.ps1')
+Export-ModuleMember -Function Wait-APICEMDeviceProvisioned
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMUtility/Wait-APICEMDeviceInInventory.ps1')
+Export-ModuleMember -Function Wait-APICEMDeviceInInventory
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'HelperScripts/VelocityParser.ps1')
 Export-ModuleMember -Function Get-VelocityDocumentInformation

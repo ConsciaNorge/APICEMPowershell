@@ -36,9 +36,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     .PARAMETER DeviceID
         The GUID which represents the device
 
+    .PARAMETER State
+        The state the device must be in to query it
+
     .EXAMPLE
-        $serviceTicket = Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
-        Get-APICEMNetworkPlugAndPlayDevice -ApicHost 'apicvip.company.local' -ServiceTicket $serviceTicket -DeviceID '5fb95f97-6558-4c1a-82ca-f732f05acab3'
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local' -Username 'bob' -Password 'Minions12345'
+        Get-APICEMNetworkPlugAndPlayDevice -DeviceID '5fb95f97-6558-4c1a-82ca-f732f05acab3'
+        Remove-APICEMServiceTicket
 #>
 Function Get-APICEMNetworkPlugAndPlayDevice {
     Param (
@@ -52,7 +56,10 @@ Function Get-APICEMNetworkPlugAndPlayDevice {
         [string]$DeviceID,
 
         [Parameter()]
-        [string]$SerialNumber
+        [string]$SerialNumber,
+
+        [Parameter()]
+        [string]$State
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
@@ -67,6 +74,10 @@ Function Get-APICEMNetworkPlugAndPlayDevice {
         throw [System.ArgumentException]::new(
             'You must supply a device ID or serial number'
         )
+    }
+
+    if(-not [string]::IsNullOrEmpty($State)) {
+        $uri += '&state=' + $State.ToUpper()
     }
 
     $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
@@ -910,7 +921,7 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
         [string]$ImageId,
 
         [Parameter()]
-        [string]$DeviceRole
+        [string]$Role
     )
 
     $session = Internal-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
@@ -926,7 +937,7 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
     if($PSBoundParameters.ContainsKey('SudiRequired')) { Add-Member -InputObject $deviceSettings -Name 'sudiRequired' -Value $SudiRequired -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($TemplateConfigId)) { Add-Member -InputObject $deviceSettings -Name 'templateConfigId' -Value $TemplateConfigId -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($ImageId)) { Add-Member -InputObject $deviceSettings -Name 'imageId' -Value $ImageId -MemberType NoteProperty }
-    if(-not [string]::IsNullOrEmpty($DeviceRole)) { Add-Member -InputObject $deviceSettings -Name 'role' -Value $DeviceRole -MemberType NoteProperty }
+    if(-not [string]::IsNullOrEmpty($Role)) { Add-Member -InputObject $deviceSettings -Name 'role' -Value $Role -MemberType NoteProperty }
 
     $requestObject = @(
         $deviceSettings
