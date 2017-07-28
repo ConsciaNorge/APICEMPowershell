@@ -67,15 +67,15 @@ Function Wait-APICEMDeviceInInventory
     [DateTime]$timeNow = [DateTime]::Now
     [DateTime]$endTime = $timeNow.AddSeconds($TimeOutSeconds)
 
-    $networkDevice = Get-APICEMNetworkDevice @session -SerialNumber $SerialNumber
+    $networkDevice = Get-APICEMNetworkDevice @session -SerialNumber $SerialNumber -ErrorAction SilentlyContinue
     while(
             ($timeNow -lt $endTime) -and 
             ($null -eq $networkDevice)
     ) {
-        Write-Progress -Activity 'Inventory presence' -CurrentOperation 'Waiting for device presence in inventory' -SecondsRemaining $endTime.Subtract($timeNow).Seconds
+        Write-Progress -Activity 'Inventory presence' -CurrentOperation 'Waiting for device presence in inventory' -SecondsRemaining $endTime.Subtract($timeNow).TotalSeconds
         Write-Host -NoNewline '.'
         Start-Sleep -Seconds $RefreshIntervalSeconds
-        $networkDevice = Get-APICEMNetworkDevice @session -SerialNumber $SerialNumber
+        $networkDevice = Get-APICEMNetworkDevice @session -SerialNumber $SerialNumber -ErrorAction SilentlyContinue
         $timeNow = [DateTime]::Now    
     }
 

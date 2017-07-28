@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'HelperScripts/APICEMCommon.ps1')
 
+. (Join-Path -Path $PSScriptRoot -ChildPath 'APICEMTicket/APICEMTicket.ps1')
+
 Export-ModuleMember -Function Remove-APICEMServiceTicket
 Export-ModuleMember -Function Get-APICEMServiceTicket
 
