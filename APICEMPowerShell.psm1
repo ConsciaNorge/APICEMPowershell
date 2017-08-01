@@ -44,13 +44,15 @@ Export-ModuleMember -Function Remove-APICEMInventoryLocation
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/ApicEmApi/Inventory/NetworkDevice.ps1')
 Export-ModuleMember -Function Get-APICEMNetworkDevice
-Export-ModuleMember -Function Get-APICEMNetworkDeviceConfig
 Export-ModuleMember -Function Get-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Get-APICEMNetworkDeviceModule
 Export-ModuleMember -Function Get-APICEMNetworkDeviceManagementInfo
 Export-ModuleMember -Function Remove-APICEMNetworkDevice
 Export-ModuleMember -Function Set-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Set-APICEMNetworkDeviceRole
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/ApicEmApi/Inventory/NetworkDeviceConfig.ps1')
+Export-ModuleMember -Function Get-APICEMNetworkDeviceConfig
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/ApicEmApi/Inventory/Tag.ps1')
 Export-ModuleMember -Function Get-APICEMInventoryTag

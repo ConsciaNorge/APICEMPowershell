@@ -5,6 +5,8 @@ $APICEMUsername = 'admin'
 $APICEMPassword = 'Minions12345'
 
 $InventoryDeviceHostName = 'dcsw1.nocturnal.local'
+$InventoryDeviceId = '90488b4d-34be-4a44-b9e5-0909768fdad1'
+$InventorySerialNumber = 'FDO1441P08L'
 
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Scope="Function", Target="*")]
 $securePassword = ConvertTo-SecureString -asPlainText -Force -String $APICEMPassword

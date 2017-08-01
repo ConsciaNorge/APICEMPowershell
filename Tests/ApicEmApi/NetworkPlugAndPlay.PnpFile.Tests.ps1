@@ -52,8 +52,8 @@ Describe -Name 'Get-APICEMNetworkPlugAndPlayImageDefault' -Tags $Utility -Fixtur
         # It -Name 'Should be an object array' -test {
         #     $imageFiles | Should BeOfType Object[]
         # }
-        It -Name 'Should return 6 platform files' -test {
-            $imageFiles.Count | Should Be 7
+        It -Name 'Should return 2 platform files' -test {
+            $imageFiles.Count | Should Be 2
         }
         $imageFilesForPlatform = Get-APICEMNetworkPlugAndPlayImageDefault -PlatformID $ImageFilePlatformID
         It -Name ('Should not return null for platform : ' + $ImageFilePlatformID) -test {

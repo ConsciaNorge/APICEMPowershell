@@ -33,8 +33,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     .PARAMETER ServiceTicket
         The service ticket issued by a call to Get-APICEMServiceTicket
 
+    .PARAMETER DeviceID
+        The id of the device to get
+
     .PARAMETER SerialNumber
         The serial number of the device (usually starts with an F)
+
+    .PARAMETER IPAddress
+        The IP address of the device to get
 
     .EXAMPLE
         Get-APICEMServiceTicket -ApicHost 'apicvip.company.local'
@@ -50,10 +56,16 @@ Function Get-APICEMNetworkDevice {
         [string]$ServiceTicket,
 
         [Parameter()]
+        [string]$DeviceID,
+
+        [Parameter()]
         [string]$SerialNumber,
 
         [Parameter()]
         [string]$IPAddress,        
+
+        [Parameter()]
+        [string]$Hostname,        
 
         [Parameter()]
         [bool]$Unreachable = $false
@@ -67,7 +79,11 @@ Function Get-APICEMNetworkDevice {
         $uri += '/serial-number/' + $SerialNumber
     } elseif(-not [string]::IsNullOrEmpty($IPAddress)) {
         $uri += '/ip-address/' + $IPAddress
-    } 
+    } elseif(-not [string]::IsNullOrEmpty($DeviceID)) {
+        $uri += '/' + $DeviceID
+    }
+
+    $uri = Add-StringParameterToUriIfNotEmpty -Uri $uri -Name 'hostname' -Value $Hostname
     
     $response = Invoke-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
 
@@ -78,43 +94,6 @@ Function Get-APICEMNetworkDevice {
     }
 
     return $response
-}
-
-<#
-    .SYNOPSIS
-        Returns the running config of the device with the specified device ID number
-
-    .PARAMETER HostIP
-        The IP address (or resolvable FQDN) of the APIC-EM server
-
-    .PARAMETER ServiceTicket
-        The service ticket issued by a call to Get-APICEMServiceTicket
-
-    .PARAMETER DeviceID
-        The ID of the device to query (this is a GUID and can be found using Get-APICEMNetworkDevice)
-
-    .EXAMPLE
-        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local'
-        Get-APICEMNetworkDeviceConfig -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
-        Remove-APICEMServiceTicket
-#>
-Function Get-APICEMNetworkDeviceConfig {
-    Param (
-        [Parameter()]
-        [string]$ApicHost,
-
-        [Parameter()]
-        [string]$ServiceTicket,
-
-        [Parameter(Mandatory)]
-        [string]$DeviceId
-    )
-
-    $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
-
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/config?id=' + $DeviceID)
-
-    return $response.RunningConfig
 }
 
 <#
