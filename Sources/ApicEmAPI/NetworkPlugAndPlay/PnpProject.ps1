@@ -214,7 +214,8 @@ Function Remove-APICEMNetworkPlugAndPlayProjectDevice {
             'Issuing delete request to APIC-EM succeeded, but failed to wait for the result',
             $_.Exception
         )
-    }}
+    }
+}
 
 <#
     .SYNOPSIS

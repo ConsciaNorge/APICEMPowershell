@@ -72,7 +72,13 @@ Function Wait-APICEMDeviceProvisioned
             ($timeNow -lt $endTime) -and 
             ($null -eq $provisionedDevice)
     ) {
-        Write-Progress -Activity 'APIC-EM Device Claimed' -CurrentOperation 'Claiming APIC-EM Plug and Play Device' -Status 'Waiting for claimed device to be provisioned.' -SecondsRemaining $endTime.Subtract($timeNow).TotalSeconds
+        # TimeOutSeconds - secondsRemaining           x
+        #----------------------------------- = -------------------
+        #         TimeOutSeconds                    100
+        $secondsRemaining = $endTime.Subtract($timeNow).TotalSeconds
+        $progressPercent = [Convert]::ToInt32((100.0 * ([Convert]::ToDouble($TimeOutSeconds - $secondsRemaining))) / [Convert]::ToDouble($TimeOutSeconds))
+
+        Write-Progress -Activity 'APIC-EM Device Claimed' -CurrentOperation 'Claiming APIC-EM Plug and Play Device' -Status 'Waiting for claimed device to be provisioned.' -SecondsRemaining $secondsRemaining -PercentComplete $progressPercent
         #Write-Host -NoNewline '.'
         Start-Sleep -Seconds $RefreshIntervalSeconds
         $provisionedDevice = Get-APICEMNetworkPlugAndPlayDevice @session -SerialNumber $SerialNumber -State 'PROVISIONED'

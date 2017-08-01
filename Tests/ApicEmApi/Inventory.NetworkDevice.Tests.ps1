@@ -118,4 +118,34 @@ Describe -Name 'Get-APICEMNetworkDevice' -Tags $Utility -Fixture {
         Remove-APICEMServiceTicket 
     }
 }
+
+Describe -Name 'Get-APICEMNetworkDeviceModule' -Tags $Utility -Fixture {
+    Context -Name 'Input' -Fixture {
+        It -name 'Getting a service ticket should not throw' -test {
+            { Get-APICEMServiceTicket -ApicHost $APICEMHost -Credentials $creds -IgnoreBadCerts } | Should Not Throw
+        }
+        It -name 'Get-APICEMNetworkDeviceModule with valid device ID should not throw' -test {
+            { Get-APICEMNetworkDeviceModule -DeviceId $InventoryDeviceId } | Should Not Throw            
+        }
+        It -name 'Get-APICEMNetworkDeviceModule with invalid device ID should throw' -test {
+            $testId = [Guid]::NewGuid()
+            { Get-APICEMNetworkDeviceModule -DeviceId $testId } | Should Throw ('No Device found with id: ' + $testId)            
+        }
+        It -name 'Removing a service ticket should not throw' -test {
+            { Remove-APICEMServiceTicket } | Should Not Throw
+        }
+    }
+    Context -Name 'Execution' -Fixture {}
+    Context -Name 'Output' -Fixture {
+        Get-APICEMServiceTicket -ApicHost $APICEMHost -Credentials $creds -IgnoreBadCerts
+        $networkDeviceModules = Get-APICEMNetworkDeviceModule -DeviceId $InventoryDeviceId
+        It -Name 'Get-APICEMNetworkDeviceModule should not be null' -test {
+            $networkDeviceModules | Should Not BeNullOrEmpty
+        }
+        It -Name 'Get-APICEMNetworkDeviceModule should return 2 items' -test {
+            $networkDeviceModules.Count | Should Be 2
+        }
+        Remove-APICEMServiceTicket 
+    }
+}
 #endregion 

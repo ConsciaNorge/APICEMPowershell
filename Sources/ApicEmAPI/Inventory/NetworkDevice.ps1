@@ -128,7 +128,7 @@ Function Get-APICEMNetworkDeviceModule {
 
     $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/module?deviceId=' + $DeviceID)
+    $response = Invoke-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/module?deviceId=' + $DeviceID)
 
     return $response
 }

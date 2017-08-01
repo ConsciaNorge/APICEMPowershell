@@ -425,7 +425,7 @@ Function Set-APICEMInventoryDiscovery {
 
 <#
     .SYNOPSIS
-        Returns a discovery job 
+        Returns an inventory discovery item 
 
     .PARAMETER ApicHost
         The IP address (or resolvable FQDN) of the APIC-EM server
@@ -461,3 +461,174 @@ Function Get-APICEMInventoryDiscovery {
 
     return $response
 }
+
+<#
+    .SYNOPSIS
+        Returns a list of inventory discovery items based on indexes and ranges.
+
+    .PARAMETER ApicHost
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER Index
+        The starting index to go from
+
+    .PARAMETER Count
+        The number of discovery items to return
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local'
+        Get-APICEMInventoryDiscovery -Index 0 -Count 3
+        Remove-APICEMServiceTicket
+#>
+Function Get-APICEMInventoryDiscoveryRange {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter()]
+        [int]$Index=1,
+        
+        [Parameter(Mandatory)]
+        [int]$Count
+    )
+
+    $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/discovery/' + $Index.ToString() + '/' + $Count.ToString()
+
+    $response = Invoke-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+
+    return $response
+}
+
+<#
+    .SYNOPSIS
+        Returns the number if discovery items configured in the inventory discovery.
+
+    .PARAMETER ApicHost
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local'
+        Get-APICEMInventoryCount
+        Remove-APICEMServiceTicket
+#>
+Function Get-APICEMInventoryDiscoveryCount {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket
+    )
+
+    $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/discovery/count'
+
+    $response = Invoke-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+
+    return [Convert]::ToUInt32($response)
+}
+
+<#
+    .SYNOPSIS
+        Removes a discovery item based on the discovery id
+
+    .PARAMETER ApicHost
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER DiscoveryID
+        The id of the discovery item to remove
+
+    .PARAMETER NoWait
+        Return the APIC-EM task id of the deletion job without waiting for it to complete
+
+    .PARAMETER Force
+        Force the deletion of the item without prompting
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local'
+        Remove-APICEMInventoryDiscovery -DiscoveryID 170
+        Remove-APICEMServiceTicket
+#>
+Function Remove-APICEMInventoryDiscovery {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter(Mandatory)]
+        [int]$DiscoveryID,
+
+        [Parameter()]
+        [switch]$NoWait,
+
+        [Parameter()]
+        [switch]$Force
+    )
+
+    if (-not ($Force -or $PSCmdlet.ShouldProcess('APIC-EM plug and play project devices'))) {  
+        return $null  
+    } 
+
+    $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/discovery/' + $DiscoveryID.ToString()
+
+    $response = $null
+    try {
+        $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+        
+        if($NoWait) {
+            return $response.response.taskId
+        }
+    } catch {
+        throw [System.Exception]::new(
+            'Failed to issue inventory item discovery item delete request to APIC-EM',
+            $_.Exception
+        )
+    }
+
+    try {
+        $taskResult = Wait-APICEMTaskEnded -TaskID $response.response.taskId
+        if($taskResult.isError) {
+            throw [System.Exception]::new(
+                $taskResult.progress
+            )
+        }
+
+        # Write-Verbose -Message ($taskResult.progress)
+        # Write-Verbose -Message ('Discovery deleted successfully. # ' + $DiscoveryID.ToString())
+        if($taskResult.progress -ne ('Discovery deleted successfully. #' + $DiscoveryID.ToString())) {
+            throw [System.Exception]::(
+                'Response from device deletion not correct'
+            )
+        }
+
+        return $taskResult.progress
+    } catch {
+        throw [System.Exception]::new(
+            'Issuing delete request to APIC-EM succeeded, but failed to wait for the result : ' + $_.Exception.Message,
+            $_.Exception
+        )
+    }
+
+    return [Convert]::ToUInt32($response)
+}
+

@@ -36,6 +36,9 @@ Export-ModuleMember -Function Get-APICEMInventoryGlobalCredential
 Export-ModuleMember -Function Get-APICEMInventoryDiscovery
 Export-ModuleMember -Function New-APICEMInventoryDiscovery
 Export-ModuleMember -Function Set-APICEMInventoryDiscovery
+Export-ModuleMember -Function Get-APICEMInventoryDiscoveryCount
+Export-ModuleMember -Function Get-APICEMInventoryDiscoveryRange
+Export-ModuleMember -Function Remove-APICEMInventoryDiscovery
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/ApicEmApi/Inventory/Location.ps1')
 Export-ModuleMember -Function Get-APICEMInventoryLocation
@@ -97,8 +100,11 @@ Export-ModuleMember -Function Get-APICEMServiceTicket
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/ApicEmApi/Task/Task.ps1')
 Export-ModuleMember -Function Get-APICEMTask
 
-. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Add-APICEMClaimedDevice')
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Add-APICEMClaimedDevice.ps1')
 Export-ModuleMember -Function Add-APICEMClaimedDevice
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Get-APICEMInventoryDiscoveryByIP.ps1')
+Export-ModuleMember -Function Get-APICEMInventoryDiscoveryByIP
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Wait-APICEMTaskEnded.ps1')
 Export-ModuleMember -Function Wait-APICEMTaskEnded
