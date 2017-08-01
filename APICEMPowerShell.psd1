@@ -1,7 +1,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = 'APICEMPowerShell/APICEMPowerShell.psm1'
+RootModule = './APICEMPowerShell.psm1'
 
 # Version number of this module.
 ModuleVersion = '1.0'
@@ -58,16 +58,16 @@ PowerShellVersion = '4.0'
 # NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = '*'
+# FunctionsToExport = '*'
 
 # Cmdlets to export from this module
-CmdletsToExport = '*'
+# CmdletsToExport = '*'
 
 # Variables to export from this module
-VariablesToExport = '*'
+# VariablesToExport = '*'
 
 # Aliases to export from this module
-AliasesToExport = '*'
+# AliasesToExport = '*'
 
 # List of all modules packaged with this module.
 ModuleList = @(@{ModuleName='APICEMPowerShell'; ModuleVersion = '1.0.0'; GUID = '7e2ea3bf-c194-4959-87b3-5907a2a6abed'})
@@ -80,13 +80,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @('APIC-EM', 'CiscoPlugAndPlay', 'PowerShell')
+        Tags = @('APIC-EM', 'CiscoPlugAndPlay', 'PowerShell')
 
         # A URL to the license for this module.
-        # LicenseUri = 'https://github.com/darrenstarr/APICEMPowershell/blob/master/LICENSE'
+        LicenseUri = 'https://github.com/darrenstarr/APICEMPowershell/blob/master/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = 'https://github.com/darrenstarr/APICEMPowershell'
+        ProjectUri = 'https://github.com/darrenstarr/APICEMPowershell'
 
         # A URL to an icon representing this module.
         # IconUri = ''
