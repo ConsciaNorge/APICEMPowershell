@@ -38,10 +38,10 @@ Describe -Name 'Create and delete inventory location' -Tags $Utility -Fixture {
             { Get-APICEMServiceTicket -ApicHost $APICEMHost -Credentials $creds -IgnoreBadCerts } | Should Not Throw
         }
         It -name 'Creating a new inventory location should not throw' -test {
-            { New-APICEMInventoryLocation -Name 'MinionVille' } | Should Not Throw
+            { New-APICEMInventoryLocation -Name 'Squishyland' } | Should Not Throw
         }
         It -name 'Getting a handle to the new location should not throw' -test {
-            { $script:newLocation = Get-APICEMInventoryLocation -Name 'MinionVille' } | Should Not Throw
+            { $script:newLocation = Get-APICEMInventoryLocation -Name 'Squishyland' } | Should Not Throw
         }
         It -name 'Removing an inventory locations should not throw' -test {
             { Remove-APICEMInventoryLocation -LocationID $script:newLocation.id } | Should Not Throw
@@ -60,7 +60,7 @@ Describe -Name 'Create and delete inventory location' -Tags $Utility -Fixture {
            { Remove-APICEMInventoryLocation -LocationID $testId } | Should Throw 
         }
         It -name 'Creating a new inventory location without -NoWait should return a GUID' -test {
-           $script:inventoryLocationId = New-APICEMInventoryLocation -Name 'MinionVille' 
+           $script:inventoryLocationId = New-APICEMInventoryLocation -Name 'Squishyland' 
            { [GUID]::Parse($script:inventoryLocationId) } | Should Not Throw 
         }
         It -name 'Removing an inventory location should succeed' -test {

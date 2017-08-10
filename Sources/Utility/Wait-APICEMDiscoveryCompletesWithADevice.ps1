@@ -81,16 +81,6 @@ Function Wait-APICEMDiscoveryCompletesWithADevice
     ) {
         if(($null -ne $discoveryResult) -and ($discoveryResult.discoveryStatus -ne 'Active')) {
             $discoveryJob = Set-APICEMInventoryDiscovery -DiscoveryID $DiscoveryID -DiscoveryStatus 'Active'
-            $discoveryStatus = Wait-APICEMTaskEnded -TaskID $discoveryJob.taskId
-
-            if(
-                ($null -eq $discoveryStatus) -or
-                ($null -ne ($discoveryStatus | Get-Member -Name errorCode))
-            ) {
-                throw [System.Exception]::new(
-                    'Failed to restart discovery job on APIC-EM'
-                )
-            }
 
             # TODO : This code compensates for APIC-EM not restarting timers. Fix this ASAP.
             $sleepUntil = $timeNow.AddSeconds($RetrySeconds)

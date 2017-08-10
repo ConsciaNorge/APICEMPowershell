@@ -40,6 +40,8 @@ add-type @"
     }
 "@
 
+
+
 Function Invoke-APICEMRestMethod {
     Param (
         [Parameter(Mandatory)]
@@ -55,7 +57,16 @@ Function Invoke-APICEMRestMethod {
         [string]$Method,
 
         [Parameter()]
-        [Object]$BodyValue
+        [Object]$BodyValue,
+
+        [Parameter()]
+        [bool]$WaitForCompletion = $false,
+
+        [Parameter()]
+        [int]$TimeOutSeconds = 20,
+
+        [Parameter()]
+        [int]$RefreshIntervalSeconds = 1
     )
  
     # Make sure there is a valid APIC-EM service ticket before continuing
@@ -93,7 +104,7 @@ Function Invoke-APICEMRestMethod {
     if($null -ne $BodyValue) {
         Write-Debug -Message ('Converting body values')
         
-        $bodyText = ConvertTo-Json -InputObject $BodyValue
+        $bodyText = ConvertTo-Json -InputObject $BodyValue -Depth 5
         Write-Debug -Message $bodyText
 
         $bodyParameter = @{
@@ -101,48 +112,165 @@ Function Invoke-APICEMRestMethod {
         }
     }
 
-    $result = $null
-    try {
-        # Make the REST API call
-        $result = Invoke-RestMethod @parameters @bodyParameter
-    } catch {
-        # Upon error, attempt to classify it and throw an exception
-        if ($_.Exception -is [System.Net.WebException]) {
-            if(
-                ($null -ne (Get-Member -InputObject $_.Exception -Name 'Response'))
-            ) {
-                $responseBody = ([System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())).ReadToEnd()
-                $errorResponse = ConvertFrom-Json -InputObject $responseBody
+    # This is a transitional component of the code. Until now, individual functions have performed the
+    # task wait state for each APIC-EM operation. Calls which wait for completion will receive more complete
+    # results from the API call so that it may seem almost as though instead of an RPC, it will be as if it
+    # were a local call.
+    if($WaitForCompletion) {
+        $commandResult = $null
+        try {
+            # Make the REST API call
+            $commandResult = Invoke-RestMethod @parameters @bodyParameter
+        } catch {
+            # Upon error, attempt to classify it and throw an exception
+            if ($_.Exception -is [System.Net.WebException]) {
                 if(
-                    ($null -ne (Get-Member -InputObject $errorResponse -Name 'response')) -and
-                    ($null -ne (Get-Member -InputObject $errorResponse.response -Name 'detail'))
+                    ($null -ne (Get-Member -InputObject $_.Exception -Name 'Response'))
                 ) {
-                    throw [System.Exception]::new(
-                        $errorResponse.response.detail,
-                        $_.Exception
-                    )
+                    $responseBody = ([System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())).ReadToEnd()
+                    $errorResponse = ConvertFrom-Json -InputObject $responseBody
+                    if(
+                        ($null -ne (Get-Member -InputObject $errorResponse -Name 'response')) -and
+                        ($null -ne (Get-Member -InputObject $errorResponse.response -Name 'detail'))
+                    ) {
+                        throw [APICEM.CallException]::new(
+                            $errorResponse.response.errorCode,
+                            $errorResponse.response.message,
+                            $errorResponse.response.detail,
+                            $_.Exception
+                        )
+                    }
                 }
-            }
 
+                throw [System.Exception]::new(
+                    'Http exception',
+                    $_.Exception
+                )
+            } else {
+                throw [System.Exception]::new(
+                    'Failed to perform REST operation against APIC-EM',
+                    $_.Exception
+                )
+            }
+        }
+
+        [System.Guid]$unusedGuid = [System.Guid]::Empty
+        if(
+            (-not ($commandResult -is [PSCustomObject])) -or
+            ($null -eq (Get-Member -InputObject $commandResult -Name 'response')) -or
+            (-not ($commandResult.Response -is [PSCustomObject])) -or
+            ($null -eq (Get-Member -InputObject $commandResult.response -Name 'taskId')) -or
+            (-not [GUID]::TryParse($commandResult.response.taskId, [ref]$unusedGuid)) -or
+            ($null -eq (Get-Member -InputObject $commandResult.response -Name 'url')) -or
+            ([string]::IsNullOrEmpty($commandResult.response.url))
+        ) {
             throw [System.Exception]::new(
-                'Http exception',
-                $_.Exception
-            )
-        } else {
-            throw [System.Exception]::new(
-                'Failed to perform get against APIC-EM',
-                $_.Exception
+                'APIC-EM returned an unexpected response. The result should have returned a JSON structure called ''response'' that contained fields called ''taskId'' and ''url'''
             )
         }
-    }
 
-    # Return the raw result if JSON is not prefered
-    if ($Raw) {
-        return $result
-    }
+        $uriBuilder = [UriBuilder]::new($Uri)
+        $uriBuilder.Path = $commandResult.response.url
+        $getTaskUrl = $uriBuilder.ToString()
 
-    # Return what came back from the APIC-EM server
-    return $result.response
+        $getTaskParameters = @{
+            Method = 'Get'
+            Uri = $getTaskUrl
+            Headers = $headers
+        }
+
+        # Setup the timeout timer
+        $timeNow = [DateTime]::Now
+        $endTime = $timeNow.AddSeconds($TimeOutSeconds)
+
+        # While time has not expired and the task status does not contain a field named 'endTime'
+        $getTaskResult = $null
+        while(
+                ($timeNow -lt $endTime) -and 
+                (-not
+                    (
+                        ($null -ne $getTaskResult) -and
+                        ($null -ne (Get-Member -InputObject $getTaskResult -Name 'response')) -and
+                        ($null -ne (Get-Member -InputObject $getTaskResult.response -Name 'endTime')) 
+                    )
+                )
+        ) {
+            # TODO : create a test case which will fail on getting task
+            $getTaskResult = Invoke-RestMethod @getTaskParameters
+
+            if(
+                ($null -ne $getTaskResult) -and 
+                ($null -ne (Get-Member -InputObject $getTaskResult -Name 'response')) -and                
+                ($null -ne (Get-Member -InputObject $getTaskResult.response -Name 'isError')) -and
+                $getTaskResult.response.isError
+            ) {
+                throw [APICEM.TaskException]::new(
+                    $getTaskResult.response.errorCode,
+                    $getTaskResult.response.progress,
+                    $getTaskResult.response.failureReason
+                )
+            }
+
+            if(
+                ($null -ne $getTaskResult) -and
+                ($null -ne (Get-Member -InputObject $getTaskResult -Name 'response')) -and
+                ($null -ne (Get-Member -InputObject $getTaskResult.response -Name 'endTime')) 
+            ) {
+                return $getTaskResult.response.progress
+            } 
+            
+            Start-Sleep -Seconds $RefreshIntervalSeconds
+            $timeNow = [DateTime]::Now
+        }
+
+        # If there is still no 'endTime' field, then return $null
+        throw [System.TimeoutException]::new(
+            'Timed out while waiting for task to complete on APIC-EM ' + $commandResult.response.taskId
+        )
+    } else {
+        $result = $null
+        try {
+            # Make the REST API call
+            $result = Invoke-RestMethod @parameters @bodyParameter
+        } catch {
+            # Upon error, attempt to classify it and throw an exception
+            if ($_.Exception -is [System.Net.WebException]) {
+                if(
+                    ($null -ne (Get-Member -InputObject $_.Exception -Name 'Response'))
+                ) {
+                    $responseBody = ([System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())).ReadToEnd()
+                    $errorResponse = ConvertFrom-Json -InputObject $responseBody
+                    if(
+                        ($null -ne (Get-Member -InputObject $errorResponse -Name 'response')) -and
+                        ($null -ne (Get-Member -InputObject $errorResponse.response -Name 'detail'))
+                    ) {
+                        throw [System.Exception]::new(
+                            $errorResponse.response.detail,
+                            $_.Exception
+                        )
+                    }
+                }
+
+                throw [System.Exception]::new(
+                    'Http exception',
+                    $_.Exception
+                )
+            } else {
+                throw [System.Exception]::new(
+                    'Failed to perform get against APIC-EM',
+                    $_.Exception
+                )
+            }
+        }
+
+        # Return the raw result if JSON is not prefered
+        if ($Raw) {
+            return $result
+        }
+
+        # Return what came back from the APIC-EM server
+        return $result.response
+    }
 }
 
 <#
@@ -192,6 +320,9 @@ Function Invoke-APICEMGetRequest {
     .PARAMETER BodyValue
         An object to convert to JSON to transfer as the body of the request
 
+    .PARAMETER WaitForCompletion
+        The process will poll the server based on the returned task and wait for completion of the task
+
     .RETURNVALUE
         The return value from the REST call if it completed successfully.
 #>
@@ -207,10 +338,13 @@ Function Invoke-APICEMPostRequest {
         [switch]$Raw,
 
         [Parameter()]
-        [Object]$BodyValue
+        [Object]$BodyValue,
+
+        [Parameter()]
+        [switch]$WaitForCompletion
     )
 
-    return Invoke-APICEMRestMethod -Method 'Post' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $Raw -BodyValue $BodyValue
+    return Invoke-APICEMRestMethod -Method 'Post' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $Raw -BodyValue $BodyValue -WaitForCompletion $WaitForCompletion
 }
 
 <#
@@ -229,6 +363,9 @@ Function Invoke-APICEMPostRequest {
     .PARAMETER BodyValue
         An object to convert to JSON to transfer as the body of the request
 
+    .PARAMETER WaitForCompletion
+        Polls the server to wait for completion of the task
+
     .RETURNVALUE
         The return value from the REST call if it completed successfully.
 #>
@@ -244,10 +381,13 @@ Function Invoke-APICEMPutRequest {
         [switch]$Raw,
 
         [Parameter()]
-        [Object]$BodyValue
+        [Object]$BodyValue,
+
+        [Parameter()]
+        [switch]$WaitForCompletion
     )
 
-    return Invoke-APICEMRestMethod -Method 'Put' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $Raw -BodyValue $BodyValue
+    return Invoke-APICEMRestMethod -Method 'Put' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $Raw -BodyValue $BodyValue -WaitForCompletion $WaitForCompletion
 }
 
 <#
@@ -260,6 +400,9 @@ Function Invoke-APICEMPutRequest {
     .PARAMETER ServiceTicket
         The service ticket issued by Get-APICEMServiceTicket after authentication
 
+    .PARAMETER WaitForCompletion
+        Polls the server to wait for completion of the task
+
     .RETURNVALUE
         The return value from the REST call if it completed successfully.
 #>
@@ -269,10 +412,13 @@ Function Invoke-APICEMDeleteRequest {
         [string]$Uri,
 
         [Parameter()]
-        [string]$ServiceTicket
+        [string]$ServiceTicket,
+
+        [Parameter()]
+        [switch]$WaitForCompletion
     )
 
-    return Invoke-APICEMRestMethod -Method 'Delete' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $true -BodyValue $BodyValue
+    return Invoke-APICEMRestMethod -Method 'Delete' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $true -BodyValue $BodyValue -WaitForCompletion $WaitForCompletion
 }
 
 Function Get-UriParameterQuery {

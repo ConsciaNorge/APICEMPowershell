@@ -169,7 +169,7 @@ Function Get-APICEMNetworkDeviceManagementInfo {
 
     $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/management-info?id=' + $DeviceID)
+    $response = Invoke-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/management-info?id=' + $DeviceID)
 
     return $response
 }
@@ -206,7 +206,7 @@ Function Get-APICEMNetworkDeviceLocation {
 
     $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
 
-    $response = Internal-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/location?id=' + $DeviceID)
+    $response = Invoke-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/location?id=' + $DeviceID)
 
     return $response
 }
@@ -277,7 +277,7 @@ Function Set-APICEMNetworkDeviceRole {
 
     $requestObject = $deviceBrief
     
-    $response = Internal-APICEMPutRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+    $response = Invoke-APICEMPutRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject -WaitForCompletion
 
     return $response
 }
@@ -343,7 +343,7 @@ Function Set-APICEMNetworkDeviceLocation {
 
     $requestObject = $deviceLocation
     
-    $response = Internal-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+    $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject -WaitForCompletion
 
     return $response
 }
@@ -360,6 +360,9 @@ Function Set-APICEMNetworkDeviceLocation {
 
     .PARAMETER DeviceID
         The GUID of the network device to remove
+
+    .PARAMETER NoWait
+        Return the APIC-EM task id immediate and don't wait for the process to complete
 
     .PARAMETER Force
         Forces changes without prompt for confirmation
@@ -382,6 +385,9 @@ Function Remove-APICEMNetworkDevice {
         [string]$DeviceID,
 
         [Parameter()]
+        [switch]$NoWait,
+
+        [Parameter()]
         [switch]$Force
     )
 
@@ -393,7 +399,40 @@ Function Remove-APICEMNetworkDevice {
 
     $uri = 'https://' + $session.ApicHost + '/api/v1/network-device/' + $DeviceID
 
-    $response = Internal-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+    $response = $null
+    try {
+        $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri
+        
+        if($NoWait) {
+            return $response.response.taskId
+        }
+    } catch {
+        throw [System.Exception]::new(
+            'Failed to issue network device delete request to APIC-EM',
+            $_.Exception
+        )
+    }
 
-    return $response.response
+    try {
+        $taskResult = Wait-APICEMTaskEnded -TaskID $response.response.taskId
+        if($taskResult.isError) {
+            throw [System.Exception]::new(
+                $taskResult.progress
+            )
+        }
+
+        if($taskResult.progress -notlike 'Network device deleted successfully') {
+            $taskResult.progress | Out-Host
+            throw [System.Exception]::(
+                'Response from networking device deletion not correct'
+            )
+        }
+
+        return $taskResult.progress
+    } catch {
+        throw [System.Exception]::new(
+            'Issuing delete request to APIC-EM succeeded, but failed to wait for the result',
+            $_.Exception
+        )
+    }
 }

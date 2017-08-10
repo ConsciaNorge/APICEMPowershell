@@ -19,4 +19,25 @@
 * Variables - Extract switch role from hostname as $DeviceROLE        (done)
 * Variables - Extract project name from hostname as $projectName        (done)
 
-* Fix distribution coming up as core
+* Fix distribution coming up as core        (done)
+
+FOC1645Y4GC	10.100.5.101 NBN-11111-SA-DEMO101
+FOC1646Y0H2	10.100.5.102 NBN-11111-SA-DEMO102
+FOC1651Y483	10.100.5.103 NBN-11111-SA-DEMO103
+FOC1642Y4LU	10.100.5.104 NBN-11111-SA-DEMO104
+FOC1651V0WA	10.100.5.100 NBN-11111-SD-DEMO100
+
+* Increase granularity of timer for display updates on claiming device
+* Make progress bar move on claiming device
+* Check for claiming errors while waiting for claiming
+
+# Feature request to Cisco
+- Make APIC-EM set the repoll timer for a device to 1 minute for up to 10 tries when a device has not yet reached inventory but is in unreachable state. Then revert to system polling timer following that.
+
+# Trond's list of variables of desire
+1) image file that is being used (chosen from default image API for platform)
+2) serial number 
+3) SNMP contact and location (from spreadsheet)
+
+
+# Add template dropdown to Excel

@@ -34,6 +34,9 @@ Describe -Name 'Create and delete inventory tag' -Tags $Utility -Fixture {
         It -name 'Getting a service ticket should not throw' -test {
             { Get-APICEMServiceTicket -ApicHost $APICEMHost -Credentials $creds -IgnoreBadCerts } | Should Not Throw
         }
+        It -name 'Creating a new inventory tag with an invalid name should throw' -test {
+            { New-APICEMInventoryTag -Name '^2x__35$  \t' } | Should Throw 'Failed to issue APIC-EM REST API request to create new tag record'
+        }
         It -name 'Creating a new inventory tag should not throw' -test {
             { New-APICEMInventoryTag -Name 'PizzaPizza' } | Should Not Throw
         }

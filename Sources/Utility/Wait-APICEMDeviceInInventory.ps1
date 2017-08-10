@@ -76,24 +76,35 @@ Function Wait-APICEMDeviceInInventory
     [DateTime]$timeNow = [DateTime]::Now
     [DateTime]$endTime = $timeNow.AddSeconds($TimeOutSeconds)
 
-    $networkDevice = Get-APICEMNetworkDevice @session -IPAddress $IPAddress -SerialNumber $SerialNumber -Unreachable $Unreachable -ErrorAction SilentlyContinue
+    $networkDevice = $null
+    try {
+        $networkDevice = Get-APICEMNetworkDevice @session -IPAddress $IPAddress -SerialNumber $SerialNumber -Unreachable $Unreachable -ErrorAction SilentlyContinue
+    } catch {
+        if(-not $_.Exception.Message.StartsWith('No Device found with Serial Number')) {
+            throw $_.Exception
+        }
+    }
     while(
             ($timeNow -lt $endTime) -and 
             ($null -eq $networkDevice)
     ) {
         Write-Progress -Activity 'Inventory presence' -CurrentOperation 'Waiting for device presence in inventory' -SecondsRemaining $endTime.Subtract($timeNow).TotalSeconds
-        #Write-Host -NoNewline '.'
+
         Start-Sleep -Seconds $RefreshIntervalSeconds
-        $networkDevice = Get-APICEMNetworkDevice @session -IPAddress $IPAddress -SerialNumber $SerialNumber -Unreachable $Unreachable -ErrorAction SilentlyContinue
+        try {
+            $networkDevice = Get-APICEMNetworkDevice @session -IPAddress $IPAddress -SerialNumber $SerialNumber -Unreachable $Unreachable -ErrorAction SilentlyContinue
+        } catch {
+            if(-not $_.Exception.Message.StartsWith('No Device found with Serial Number')) {
+                throw $_.Exception
+            }
+        }
         $timeNow = [DateTime]::Now    
     }
 
     if($null -ne $networkDevice) {
         Write-Progress -Activity 'Inventory presence' -CurrentOperation 'Waiting for device presence in inventory' -Status 'Completed' -Completed
-        #Write-Host 'done'
     } else {
         Write-Progress -Activity 'Inventory presence' -CurrentOperation 'Waiting for device presence in inventory' -Status 'Timed out' -Completed 
-        #Write-Host 'timed out'
     }
 
     return ($null -ne $networkDevice)

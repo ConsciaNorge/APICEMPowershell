@@ -67,7 +67,10 @@ Function Add-APICEMClaimedDevice
         [bool]$SudiRequired,
 
         [Parameter()]
-        [switch]$UseDefaultImage
+        [switch]$UseDefaultImage,
+
+        [Parameter()]
+        [PSObject]$DiscoveryInfo
     )
 
     $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
@@ -142,6 +145,7 @@ Function Add-APICEMClaimedDevice
         SudiRequired = $SudiRequired 
         TemplateConfigId = $templateConfig.id
         ImageId = $imageId
+        DiscoveryInfo = $DiscoveryInfo
     }
 
     # Claim the device

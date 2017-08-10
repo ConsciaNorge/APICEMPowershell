@@ -212,9 +212,41 @@ Function New-APICEMInventoryDiscovery {
 
     $requestObject = $deviceSettings
 
-    $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+    $response = $null
+    try {
+        $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
 
-    return $response
+        if ($NoWait) {
+            return $response.taskId
+        }
+    } catch {
+        throw [System.Exception]::new(
+            'Failed to issue APIC-EM REST API request to create a new discovery',
+            $_.Exception
+        )
+    }
+
+    try {
+        $result = Wait-APICEMTaskEnded -TaskID $response.TaskId
+        if($null -eq $result) {
+            throw [System.Exception]::new(
+                'Request to create new APIC-EM inventory discovery item, but failed to issue request to wait for completion'
+            )
+        }
+
+        if($result.isError) {
+            throw [System.Exception]::new(
+                $result.failureReason
+            )
+        }
+
+        return $result.progress
+    } catch {
+        throw [System.Exception]::new(
+            'Request to create new APIC-EM inventory discovery item could not be completed',
+            $_.Exception
+        )
+    }
 }
 
 <#
@@ -304,8 +336,10 @@ Function New-APICEMInventoryDiscovery {
 Function Set-APICEMInventoryDiscovery {
     [CmdletBinding(SupportsShouldProcess = $true)]
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword')]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'PasswordList')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'SnmpAuthPassphrase')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'GlobalCredentialIDList')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUserNameAndPassWordParams", "", Scope="Function", Target="*")]
     Param (
         [Parameter()]
         [string]$ApicHost,
@@ -418,8 +452,42 @@ Function Set-APICEMInventoryDiscovery {
 
     $requestObject = $deviceSettings
 
-    $response = Invoke-APICEMPutRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+    $response = $null
+    try {
+        $response = Invoke-APICEMPutRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
 
+        if ($NoWait) {
+            return $response.taskId
+        }
+    } catch {
+        throw [System.Exception]::new(
+            'Failed to issue APIC-EM REST API request to update the discovery',
+            $_.Exception
+        )
+    }
+
+    try {
+        $result = Wait-APICEMTaskEnded -TaskID $response.TaskId
+        if($null -eq $result) {
+            throw [System.Exception]::new(
+                'Request to update the APIC-EM discovery item, but failed to issue request to wait for completion'
+            )
+        }
+
+        $result | Out-Host
+        if($result.isError) {
+            throw [System.Exception]::new(
+                $result.failureReason
+            )
+        }
+
+        return $result.progress
+    } catch {
+        throw [System.Exception]::new(
+            'Request to create new APIC-EM inventory discovery item could not be completed',
+            $_.Exception
+        )
+    }
     return $response
 }
 
@@ -613,8 +681,9 @@ Function Remove-APICEMInventoryDiscovery {
             )
         }
 
-        # Write-Verbose -Message ($taskResult.progress)
-        # Write-Verbose -Message ('Discovery deleted successfully. # ' + $DiscoveryID.ToString())
+        #Write-Host ('[' + $taskResult.progress + ']')
+        #Write-Host ('[Discovery deleted successfully. # ' + $DiscoveryID.ToString() + ']')
+        #Set-Content -Path 'c:\temp\debug.txt' -Value ('[' + $taskResult.progress + ']' + '[Discovery deleted successfully. # ' + $DiscoveryID.ToString() + ']')
         if($taskResult.progress -ne ('Discovery deleted successfully. #' + $DiscoveryID.ToString())) {
             throw [System.Exception]::(
                 'Response from device deletion not correct'

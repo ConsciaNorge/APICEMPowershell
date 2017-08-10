@@ -123,39 +123,19 @@ Function New-APICEMInventoryTag {
 
     $response = $null
     try {
-        $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
-
         if ($NoWait) {
+            $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject 
             return $response.taskId
         }
+
+        $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject -WaitForCompletion
     } catch {
         throw [System.Exception]::new(
             'Failed to issue APIC-EM REST API request to create new tag record',
             $_.Exception
         )
     }
-
-    try {
-        $result = Wait-APICEMTaskEnded -TaskID $response.TaskId
-        if($null -eq $result) {
-            throw [System.Exception]::new(
-                'Request to create new APIC-EM inventory tag item, but failed to issue request to wait for completion'
-            )
-        }
-
-        if($result.isError) {
-            throw [System.Exception]::new(
-                'Error returned from APIC-EM new inventory tag : ' + $result.failureReason
-            )
-        }
-
-        return $result.progress
-    } catch {
-        throw [System.Exception]::new(
-            'Request to create new APIC-EM inventory tag item could not be completed',
-            $_.Exception
-        )
-    }
+    return $response
 }
 
 <#
@@ -240,11 +220,13 @@ Function Remove-APICEMInventoryTag {
     }
 
     $response = $null
-    try {
-        $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri
-        
+    try {    
         if($NoWait) {
+            $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri
             return $response.response.taskId
+        }
+        else {
+            $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri -WaitForCompletion
         }
     } catch {
         throw [System.Exception]::new(
@@ -253,27 +235,13 @@ Function Remove-APICEMInventoryTag {
         )
     }
 
-    try {
-        $taskResult = Wait-APICEMTaskEnded -TaskID $response.response.taskId
-        if($taskResult.isError) {
-            throw [System.Exception]::new(
-                'Error deleting tag : ' + $taskResult.progress
-            )
-        }
-
-        if($taskResult.progress -notlike 'Tag * deleted successfully') {
-            throw [System.Exception]::(
-                'Response from tag deletion not correct'
-            )
-        }
-
-        return $taskResult.progress
-    } catch {
-        throw [System.Exception]::new(
-            'Issuing delete request to APIC-EM succeeded, but failed to wait for the result',
-            $_.Exception
+    if($response -notlike 'Tag * deleted successfully') {
+        throw [System.Exception]::(
+            'Response from tag deletion not correct'
         )
     }
+
+    return $response
 }
 
 

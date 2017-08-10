@@ -310,6 +310,9 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
         [string]$ImageId,
 
         [Parameter()]
+        [PSObject]$DiscoveryInfo,
+
+        [Parameter()]
         [string]$Role,
 
         [Parameter()]
@@ -330,10 +333,13 @@ Function Add-APICEMNetworkPlugAndPlayProjectDevice {
     if(-not [string]::IsNullOrEmpty($TemplateConfigId)) { Add-Member -InputObject $deviceSettings -Name 'templateConfigId' -Value $TemplateConfigId -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($ImageId)) { Add-Member -InputObject $deviceSettings -Name 'imageId' -Value $ImageId -MemberType NoteProperty }
     if(-not [string]::IsNullOrEmpty($Role)) { Add-Member -InputObject $deviceSettings -Name 'role' -Value $Role -MemberType NoteProperty }
+    if($null -ne $DiscoveryInfo) { Add-Member -InputObject $deviceSettings -Name 'deviceDiscoveryInfo' -Value $DiscoveryInfo -MemberType NoteProperty }
 
     $requestObject = @(
         $deviceSettings
     )
+
+    ConvertTo-Json -InputObject $requestObject -Depth 5 | Out-Host
 
     $response = $null
     try {
@@ -455,7 +461,49 @@ Function New-APICEMNetworkPlugAndPlayProject {
         $site
     )
 
-    $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+    $response = $null
+    try {
+        $response = Invoke-APICEMPostRequest -ServiceTicket $session.ServiceTicket -Uri $uri -BodyValue $requestObject
+
+        if ($NoWait) {
+            return $response.taskId
+        }
+    } catch {
+        throw [System.Exception]::new(
+            'Failed to issue APIC-EM REST API request to create a new plug and play project',
+            $_.Exception
+        )
+    }
+
+    try {
+        $taskResult = Wait-APICEMTaskEnded -TaskID $response.TaskId
+        if($null -eq $taskResult) {
+            throw [System.Exception]::new(
+                'Request to create new APIC-EM plug and play project, but failed to issue request to wait for completion'
+            )
+        }
+
+        if($taskResult.isError) {
+            throw [System.Exception]::new(
+                $taskResult.failureReason
+            )
+        }
+
+        $result = ConvertFrom-Json -InputObject $taskResult.Progress
+        $result | Out-Host
+        if($result.message -notlike 'Success creating new site') {
+            throw [System.Exception]::(
+                'Response from location deletion not correct'
+            )
+        }
+
+        return $result.siteId
+    } catch {
+        throw [System.Exception]::new(
+            'Request to create new APIC-EM inventory plug and play project item could not be completed',
+            $_.Exception
+        )
+    }
 
     return $response
 }

@@ -60,7 +60,7 @@ Function Get-APICEMIsInDiscoveryRange {
         [string]$IPAddress
     )
 
-    if($DiscoveryType -eq 'Single') {
+    if(($DiscoveryType -eq 'Single') -or ($DiscoveryType -eq 'CDP')) {
         return ($IPAddress -eq $IPAddressRange.Trim())
     }
 

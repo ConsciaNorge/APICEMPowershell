@@ -23,6 +23,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #>
 
+Add-Type -TypeDefinition (Get-Content -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/CSharp/APICEMException.cs') -Raw)
+
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/RESTAPIHelpers.ps1')
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/ApicEmApi/File/FileService.ps1')
@@ -106,6 +108,9 @@ Export-ModuleMember -Function Add-APICEMClaimedDevice
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Get-APICEMInventoryDiscoveryByIP.ps1')
 Export-ModuleMember -Function Get-APICEMInventoryDiscoveryByIP
 
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/New-DeviceDiscoverySetting.ps1')
+Export-ModuleMember -Function New-DeviceDiscoverySetting
+
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Wait-APICEMTaskEnded.ps1')
 Export-ModuleMember -Function Wait-APICEMTaskEnded
 
@@ -124,5 +129,26 @@ Export-ModuleMember -Function Wait-APICEMDeviceProvisioned
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Wait-APICEMDeviceInInventory.ps1')
 Export-ModuleMember -Function Wait-APICEMDeviceInInventory
 
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Get-APICEMPnPDevicesByNetwork.ps1')
+Export-ModuleMember -Function Get-APICEMPnPDevicesByNetwork
+Export-ModuleMember -Function Test-IsInNetwork
+Export-ModuleMember -Function Get-NetworkPrefixParts
+
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/VelocityParser.ps1')
 Export-ModuleMember -Function Get-VelocityDocumentInformation
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Get-APICEMNeighborInformationFromTopologyInfo.ps1')
+Export-ModuleMember -Function Get-APICEMNeighborInformationFromTopologyInfo
+Export-ModuleMember -Function Get-CiscoInterfaceShortName
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Get-APICEMNetworkTopologyFromPnPDevices.ps1')
+Export-ModuleMember -Function Get-APICEMNetworkTopologyFromPnPDevices
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Get-APICEMPnPNetworkDiagram.ps1')
+Export-ModuleMember -Function Get-APICEMPnPNetworkDiagram
+
+. (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/Utility/Get-CiscoInterfaceSortingName.ps1')
+Export-ModuleMember -Function Get-CiscoInterfaceSortingName
+
+
+

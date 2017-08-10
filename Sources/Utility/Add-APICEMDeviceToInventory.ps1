@@ -90,19 +90,7 @@ Function Add-APICEMDeviceToInventory
         DiscoveryType          = 'Single'
     }
 
-    $newDiscoveryJob = New-APICEMInventoryDiscovery @session @discoveryParameters
-    $newDiscoveryStatus = Wait-APICEMTaskEnded @session -TaskID $newDiscoveryJob.taskId
-
-    if(
-        ($null -eq $newDiscoveryStatus) -or
-        ($null -ne ($newDiscoveryStatus | Get-Member -Name errorCode))
-    ) {
-        throw [System.Exception]::new(
-            'Failed to initiate discovery job on APIC-EM'
-        )
-    }
-
-    $newDiscoveryId = $newDiscoveryStatus.progress
+    $newDiscoveryId = New-APICEMInventoryDiscovery @session @discoveryParameters
 
     $discoveryResult = Wait-APICEMDiscoveryCompletesWithADevice @session -DiscoveryID $newDiscoveryId
     if(
@@ -114,6 +102,11 @@ Function Add-APICEMDeviceToInventory
             'Failed to find the newly claimed device via inventory discovery before timing out'
         )
     }
+
+    Write-Verbose -Message 'Remove discovery task now that it has completed : ' + $newDiscoveryId
+    Remove-APICEMInventoryDiscovery @session -DiscoveryID $newDiscoveryId
+
+    Write-Verbose -Message 'Discovery task removed'
 
     $claimedDeviceId = $discoveryResult.deviceIds.Trim()
 
