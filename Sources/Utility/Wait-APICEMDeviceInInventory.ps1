@@ -120,7 +120,7 @@ Function Wait-APICEMDeviceInInventory
                 $ResyncOnUnreachable
             ) {
                 $timeOfLastSync = $timeNow
-                $resyncResult = Invoke-APICEMNetworkDeviceResync @session -DeviceID @($networkDevice.id) 
+                $resyncResult = Invoke-APICEMNetworkDeviceResync @session -DeviceID $networkDevice.id 
                 if(-not ($resyncResult -ilike 'Synced devices:*')) {
                     throw 'Failed to initiate syncing of device ' + $SerialNumber
                 }

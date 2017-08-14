@@ -470,7 +470,7 @@ Function Invoke-APICEMNetworkDeviceResync {
         [string]$ServiceTicket,
 
         [Parameter(Mandatory)]
-        [string]$DeviceId,
+        [string[]]$DeviceId,
 
         [Parameter()]
         [int]$TimeOutSeconds = 240
