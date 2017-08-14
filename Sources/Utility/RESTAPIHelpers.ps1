@@ -384,10 +384,13 @@ Function Invoke-APICEMPutRequest {
         [Object]$BodyValue,
 
         [Parameter()]
-        [switch]$WaitForCompletion
+        [switch]$WaitForCompletion,
+
+        [Parameter()]
+        [int]$TimeOutSeconds = 20
     )
 
-    return Invoke-APICEMRestMethod -Method 'Put' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $Raw -BodyValue $BodyValue -WaitForCompletion $WaitForCompletion
+    return Invoke-APICEMRestMethod -Method 'Put' -Uri $Uri -ServiceTicket $ServiceTicket -Raw $Raw -BodyValue $BodyValue -WaitForCompletion $WaitForCompletion -TimeOutSeconds $TimeOutSeconds
 }
 
 <#

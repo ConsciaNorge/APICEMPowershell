@@ -52,6 +52,7 @@ Export-ModuleMember -Function Get-APICEMNetworkDevice
 Export-ModuleMember -Function Get-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Get-APICEMNetworkDeviceModule
 Export-ModuleMember -Function Get-APICEMNetworkDeviceManagementInfo
+Export-ModuleMember -Function Invoke-APICEMNetworkDeviceResync
 Export-ModuleMember -Function Remove-APICEMNetworkDevice
 Export-ModuleMember -Function Set-APICEMNetworkDeviceLocation
 Export-ModuleMember -Function Set-APICEMNetworkDeviceRole
@@ -82,6 +83,7 @@ Export-ModuleMember -Function Add-APICEMNetworkPlugAndPlayProjectDevice
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayProject
 Export-ModuleMember -Function Get-APICEMNetworkPlugAndPlayProjectDevice
 Export-ModuleMember -Function New-APICEMNetworkPlugAndPlayProject
+Export-ModuleMember -Function Remove-APICEMNetworkPlugAndPlayProject
 Export-ModuleMember -Function Remove-APICEMNetworkPlugAndPlayProjectDevice
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Sources/ApicEmApi/NetworkPlugAndPlay/Template.ps1')

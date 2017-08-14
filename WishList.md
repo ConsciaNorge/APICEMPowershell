@@ -41,3 +41,5 @@ FOC1651V0WA	10.100.5.100 NBN-11111-SD-DEMO100
 
 
 # Add template dropdown to Excel
+
+# APIC-EM API for getting pnp project by device

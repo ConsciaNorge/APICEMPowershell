@@ -76,6 +76,63 @@ Function Get-APICEMNetworkPlugAndPlayProject {
 
 <#
     .SYNOPSIS
+        Removes a network plug and play project
+
+    .PARAMETER ApicHost
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER ProjectID
+        The GUID of the project
+
+    .PARAMETER NoWait
+        Return an APIC-EM task id and don't wait for result.
+
+    .PARAMETER Force
+        Force the change, don't prompt
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local'
+        Remove-APICEMNetworkPlugAndPlayProject -ProjectID 'dc846aaa-0f26-4d08-bbe0-4ae032971b5a'
+        Remove-APICEMServiceTicket
+#>
+Function Remove-APICEMNetworkPlugAndPlayProject {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter(Mandatory)]
+        [string]$ProjectID,
+
+        [Parameter()]
+        [switch]$NoWait,
+
+        [Parameter()]
+        [switch]$Force
+    )
+
+    if (-not ($Force -or $PSCmdlet.ShouldProcess('APIC-EM plug and play project devices'))) {  
+        return $null  
+    } 
+
+    $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $uri = 'https://' + $session.ApicHost + '/api/v1/pnp-project/' + $ProjectID
+    
+    $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri -WaitForCompletion
+
+    return $response
+}
+
+
+<#
+    .SYNOPSIS
         Returns the device associated with a plug and play project and device id
 
     .PARAMETER ApicHost
@@ -180,41 +237,9 @@ Function Remove-APICEMNetworkPlugAndPlayProjectDevice {
     
     $uri = Add-StringPathToUriIfNotEmpty -uri $uri $DeviceID 
 
-    $response = $null
-    try {
-        $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri
-        
-        if($NoWait) {
-            return $response.response.taskId
-        }
-    } catch {
-        throw [System.Exception]::new(
-            'Failed to issue project device delete request to APIC-EM',
-            $_.Exception
-        )
-    }
+    $response = Invoke-APICEMDeleteRequest -ServiceTicket $session.ServiceTicket -Uri $uri -WaitForCompletion
 
-    try {
-        $taskResult = Wait-APICEMTaskEnded -TaskID $response.response.taskId
-        if($taskResult.isError) {
-            throw [System.Exception]::new(
-                $taskResult.progress
-            )
-        }
-
-        if($taskResult.progress -ne ('Success Deleting Site Device(Rule): id# ' + $DeviceID)) {
-            throw [System.Exception]::(
-                'Response from device deletion not correct'
-            )
-        }
-
-        return $taskResult.progress
-    } catch {
-        throw [System.Exception]::new(
-            'Issuing delete request to APIC-EM succeeded, but failed to wait for the result',
-            $_.Exception
-        )
-    }
+    return $response
 }
 
 <#

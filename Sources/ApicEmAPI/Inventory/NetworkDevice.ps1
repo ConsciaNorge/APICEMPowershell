@@ -388,6 +388,9 @@ Function Remove-APICEMNetworkDevice {
         [switch]$NoWait,
 
         [Parameter()]
+        [int]$TimeOutSeconds,
+
+        [Parameter()]
         [switch]$Force
     )
 
@@ -414,7 +417,7 @@ Function Remove-APICEMNetworkDevice {
     }
 
     try {
-        $taskResult = Wait-APICEMTaskEnded -TaskID $response.response.taskId
+        $taskResult = Wait-APICEMTaskEnded -TaskID $response.response.taskId -TimeOutSeconds $TimeOutSeconds
         if($taskResult.isError) {
             throw [System.Exception]::new(
                 $taskResult.progress
@@ -435,4 +438,48 @@ Function Remove-APICEMNetworkDevice {
             $_.Exception
         )
     }
+}
+
+<#
+    .SYNOPSIS
+        Triggers a device resync request for a device with the given inventory device id
+
+    .PARAMETER HostIP
+        The IP address (or resolvable FQDN) of the APIC-EM server
+
+    .PARAMETER ServiceTicket
+        The service ticket issued by a call to Get-APICEMServiceTicket
+
+    .PARAMETER DeviceID
+        The ID of the device to resync (this is a GUID and can be found using Get-APICEMNetworkDevice)
+
+    .PARAMETER TimeOutSeconds
+        The number of seconds to wait before timing out while waiting for a response
+
+    .EXAMPLE
+        Get-APICEMServiceTicket -ApicHost 'apicvip.company.local'
+        Invoke-APICEMNetworkDeviceResync -DeviceID '90488b4d-34be-4a44-b9e5-0909768fdad1'
+        Remove-APICEMServiceTicket
+#>
+Function Invoke-APICEMNetworkDeviceResync {
+    Param (
+        [Parameter()]
+        [string]$ApicHost,
+
+        [Parameter()]
+        [string]$ServiceTicket,
+
+        [Parameter(Mandatory)]
+        [string]$DeviceId,
+
+        [Parameter()]
+        [int]$TimeOutSeconds = 240
+    )
+
+    $session = Get-APICEMHostIPAndServiceTicket -ApicHost $ApicHost -ServiceTicket $ServiceTicket        
+
+    $requestObject = [string[]]@($DeviceID)
+
+    $response = Invoke-APICEMPutRequest -ServiceTicket $session.ServiceTicket -Uri ('https://' + $session.ApicHost + '/api/v1/network-device/sync') -BodyValue $requestObject -WaitForCompletion -TimeOutSeconds $TimeOutSeconds
+    return $response
 }

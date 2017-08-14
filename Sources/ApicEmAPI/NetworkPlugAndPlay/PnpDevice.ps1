@@ -36,6 +36,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     .PARAMETER DeviceID
         The GUID which represents the device
 
+    .PARAMETER SerialNumber
+        The serial number of the device to find
+
+    .PARAMETER IPAddress
+        The IP address of the device to find
+
+    .PARAMETER MACAddress
+        The MAC address of the device to find
+
+    .PARAMETER HostName
+        The host name of the device to find
+
     .PARAMETER State
         The state the device must be in to query it
 
@@ -59,6 +71,15 @@ Function Get-APICEMNetworkPlugAndPlayDevice {
         [string]$SerialNumber,
 
         [Parameter()]
+        [string]$IPAddress,
+
+        [Parameter()]
+        [string]$MACAddress,
+
+        [Parameter()]
+        [string]$HostName,
+
+        [Parameter()]
         [string]$State,
 
         [Parameter()]
@@ -78,6 +99,9 @@ Function Get-APICEMNetworkPlugAndPlayDevice {
     $uri = Add-StringPathToUriIfNotEmpty -Uri $uri -Value $DeviceID
     $uri = Add-StringParameterToUriIfNotEmpty -Uri $uri -Name 'serialNumber' -Value $SerialNumber
     $uri = Add-StringParameterToUriIfNotEmpty -Uri $uri -Name 'state' -Value $State -ForceUpper
+    $uri = Add-StringParameterToUriIfNotEmpty -Uri $uri -Name 'ipAddress' -Value $IPAddress
+    $uri = Add-StringParameterToUriIfNotEmpty -Uri $uri -Name 'macAddress' -Value $MACAddress
+    $uri = Add-StringParameterToUriIfNotEmpty -Uri $uri -Name 'hostName' -Value $HostName
     $uri = Add-StringParameterToUriIfTrue -Uri $uri -Name 'state' -Value 'UNCLAIMED' -TestValue $Unclaimed
 
     $response = Invoke-APICEMGetRequest -ServiceTicket $session.ServiceTicket -Uri $uri
